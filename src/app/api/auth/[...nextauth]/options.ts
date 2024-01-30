@@ -27,18 +27,13 @@ export const options: NextAuthOptions = {
                 }
             },
             async authorize(credentials, req) {
-                const { username, password } = credentials || {};
+                const user = { id: "1", username: "izyk", email: "example@gmail.com", password: "1234"}
 
-                const query = `SELECT * FROM users WHERE username = ? AND password = ?`
-                const [user]: any = await executeQuery(query, [username, password])
 
-                if(user) {
-                    return {
-                        id: user.userId,
-                        name: username
-                    }
-                } else {
-                    return null
+                return {
+                    id: user.id,
+                    name: user.username,
+                    email: user.email
                 }
             }
         })
