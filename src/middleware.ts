@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server"
 
 
-const middleware = async (request) => {
+const middleware = async (request:  any) => {
 
         return NextResponse.redirect(new URL("/login", request.url))
 
