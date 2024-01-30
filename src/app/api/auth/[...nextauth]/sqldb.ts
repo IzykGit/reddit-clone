@@ -4,11 +4,11 @@ import mysql from 'mysql2/promise'
 const executeQuery = async (query, data) => {
     try {
         const db = await mysql.createConnection({
-            host: "66.228.44.91",
+            host: process.env.MySQL_HOST,
             port: 3306,
-            user: "izyk",
-            password: "vf0fW9Hg&",
-            database: "test"
+            user: process.env.MySQL_USERNAME,
+            password: process.env.MySQL_PASSWORD,
+            database: process.env.MySQL_DATABASE
         });
 
         const [result] = await db.execute(query, data);
