@@ -1,12 +1,14 @@
 import type { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials"
-import prisma from '../../../libs/prismadb';
-import { PrismaAdapter } from '@next-auth/prisma-adapter';
-import bcrypt from 'bcrypt';
+import executeQuery from "./sqldb";
+import bcrypt from 'bcrypt'
+import { stringify } from "querystring";
+import { redirect } from "next/dist/server/api-utils";
+import { RedirectType } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect";
 
 
 export const options: NextAuthOptions = {
-    adapter: PrismaAdapter(prisma),
     session:  {
         strategy: "jwt",
         maxAge: 30 * 24 * 60 * 60
@@ -23,26 +25,27 @@ export const options: NextAuthOptions = {
                 password: {
                     label: "Password",
                     type: "password",
+                    placeholder: "Your Password"
                 }
             },
             async authorize(credentials, req) {
-                const user = { id: "1", username: "izyk", email: "example@gmail.com", password: "1234"}
+                const { username, password } = credentials || {};
 
 
-                return {
-                    id: user.id,
-                    name: user.username,
-                    email: user.email
+                const query = "SELECT * FROM users WHERE username = ?"
+                const [user]: any = await executeQuery(query, [username])
+
+                if(user && await bcrypt.compare(password!, user.password)) {
+                    return {
+                        id: user.userId,
+                        name: user.username,
+                        email: user.email,
+                    }
                 }
+
             }
         })
     ],
-    secret: process.env.SECRET,
-    debug: process.env.NODE_ENV === "development"
-};
-
-
-/* 
     callbacks: {
         jwt: async ({ token, user }) => {
             if(user) {
@@ -60,5 +63,5 @@ export const options: NextAuthOptions = {
 
             return session;
         }
-    },
-*/
+    }
+};

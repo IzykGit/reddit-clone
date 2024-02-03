@@ -13,7 +13,7 @@ const Login = () => {
         <Navbar />
         <h1>Login</h1>
         <input onChange={(e) => setLoginUsername(e.target.value)} type='text' placeholder='username'/>
-        <input onChange={(e) => setLoginPassword(e.target.value)} type='text' placeholder='username'/>
+        <input onChange={(e) => setLoginPassword(e.target.value)} type='text' placeholder='password'/>
         <button>Login</button>
     </div>
   )
