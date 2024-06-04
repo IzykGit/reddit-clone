@@ -1,0 +1,33 @@
+
+.nav_section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    height: 7rem;
+    padding: 0rem 5rem;
+
+    border-bottom: 0.15rem solid black;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.navbar {
+    width: 30rem;
+
+    display: flex;
+    justify-content: space-between;
+}
+
+.navbar > a {
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.navbar > a:hover {
+    transform: scale(1.1);
+}
