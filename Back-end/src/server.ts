@@ -14,7 +14,10 @@ import mongoose from 'mongoose';
 import { MongoClient } from 'mongodb';
 
 
-app.get("/hello", async (req, res) => {
+import Post from './models/postmodel.js';
+
+
+app.get("/home", async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI!)
 
 
@@ -34,6 +37,26 @@ app.get("/hello", async (req, res) => {
         await client.close()
     }
 });
+
+app.post("/post", async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI!)
+
+    try {
+        await client.connect();
+        const db = client.db('SocialApp');
+        const newPost = new Post(req.body);
+        await db.collection('posts').insertOne(newPost)
+
+        res.status(201).json(newPost);
+    }
+    catch (err) {
+        console.error("Post failed:", err)
+        res.status(500).json({ message: `Post Failed: ${err}`})
+    }
+    finally {
+        await client.close()
+    }
+})
 
 // app.put('/api/posts/:userId/upvote', (req, res) => {
 //     const { userId } = req.params;

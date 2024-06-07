@@ -16,7 +16,7 @@ const Home = () => {
   useEffect(() => {
 
     const fetchData = async () => {
-      await axios.get("http://localhost:5000/hello")
+      await axios.get("http://localhost:5000/home")
       .then(response => {
         setData(response.data)
 
