@@ -3,13 +3,15 @@
 .home_main {
     display: grid;
     grid-template-columns: 0.25fr 0.5fr 0.25fr;
-    background-color: rgb(35, 35, 59);
+    background-color: rgb(255, 255, 255);
 }
 
 .media_post_link {
-    color: white;
+    color: black;
     text-decoration: none;
     grid-column: 2;
+
+    height: max-content;
 }
 
 .media_post {
@@ -19,4 +21,10 @@
 
 .post_title {
     font-size: 2rem;
+}
+
+.sort {
+    grid-column: 3;
+    grid-row: 1;
+    border: 1px solid black;
 }

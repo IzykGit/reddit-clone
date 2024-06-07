@@ -73,7 +73,7 @@ const Post = () => {
             setPostDate(`${year}-${month}-${day}`) 
         }
         else {
-            setPostDate("Loading...")
+            setPostDate("")
         }
     }, [post?.date])
 
@@ -87,7 +87,7 @@ const Post = () => {
             <div>
                 <h1>{post?.title}</h1>
                 <p>{post?.body}</p>
-                <p>{post?.name}</p>
+                <p>{post?.username}</p>
                 <p>{postDate}</p>
             </div>
 
