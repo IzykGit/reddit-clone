@@ -5,13 +5,16 @@ import { Link } from "react-router-dom"
 
 import Navbar from "../components/Navbar"
 
+import styles from "../styles/Home.module.css"
+
 
 // defining data
 interface Data {
   name: string,
   title: string,
-  body: string
-  _id: string
+  body: string,
+  _id: string,
+  date: Date
 }
 
 const Home = () => {
@@ -19,6 +22,7 @@ const Home = () => {
 
   // usestate to assign data
   const [data, setData] = useState<Data[]>([])
+
 
   useEffect(() => {
 
@@ -32,10 +36,10 @@ const Home = () => {
       })
       .catch(error => console.error(error))
     }
-
     fetchData()
 
   }, [])
+
 
 
   // logging data
@@ -46,14 +50,15 @@ const Home = () => {
   return (
     <>
     <Navbar />
-    <main>
+    <main className={styles.home_main}>
         {data.map(post => (
-          <div key={post._id}>
-            <Link to={`/post/${post._id}`} state={{ postId: post._id }}>
-              <p style={{fontWeight: "bold", fontSize: "1.5rem"}}>{post.title}</p>
-              <p>{post.body}</p>
-            </Link>
-          </div>
+          <Link key={post._id} className={styles.media_post_link} to={`/post/${post._id}`} state={{ postId: post._id }}>
+            <div className={styles.media_post}>
+                <p className={styles.post_title} style={{fontWeight: "bold", fontSize: "1.5rem"}}>{post.title}</p>
+                <p>{post.body}</p>
+                <p>{post.date}</p>
+            </div>
+          </Link>
         ))}
     </main>
     </>

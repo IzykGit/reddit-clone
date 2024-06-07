@@ -1,9 +1,13 @@
-import 'dotenv/config'
+
 
 import express from 'express'
 import bodyParser from 'body-parser'
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import multer from 'multer';
 
 import cors from 'cors';
+
+import 'dotenv/config'
 
 const app = express();
 app.use(express());
@@ -15,6 +19,16 @@ import { MongoClient } from 'mongodb';
 
 
 import Post from './models/postmodel.js';
+
+
+const s3Client = new S3Client({
+    region: process.env.BUCKET_REGION,
+    credentials: {
+      accessKeyId:  `${process.env.ACCESS_KEY}`,
+      secretAccessKey: `${process.env.SECRET_KEY}`,
+    },
+    endpoint: 'https://us-east-1.linodeobjects.com',
+  });
 
 
 // fetching all posts from database
