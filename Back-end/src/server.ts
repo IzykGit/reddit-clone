@@ -10,13 +10,14 @@ app.use(express());
 app.use(bodyParser.json())
 app.use(cors());
 
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { MongoClient } from 'mongodb';
 
 
 import Post from './models/postmodel.js';
 
 
+// fetching all posts from database
 app.get("/home", async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI!)
 
@@ -25,9 +26,8 @@ app.get("/home", async (req, res) => {
         await client.connect();
 
         const db = client.db('SocialApp')
-        const data = await db.collection('User1').find({}).toArray();
+        const data = await db.collection('posts').find({}).toArray();
 
-        console.log(data)
         res.json(data)
     }
     catch (err) {
@@ -38,6 +38,32 @@ app.get("/home", async (req, res) => {
     }
 });
 
+
+//fetching specific post form database
+
+app.get("/post/:id", async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI!)
+
+    const postId = new Types.ObjectId(req.params.id);
+
+    try {
+        await client.connect();
+
+        const db = client.db("SocialApp");
+        const post = await db.collection('posts').findOne({ _id: postId })
+        console.log(post)
+        res.json(post)
+    }
+    catch (error) {
+        console.error("Error retrieving post:", error)
+        res.status(404).json({ message: "Error"})
+    }
+})
+
+
+
+
+// post creation page
 app.post("/post", async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI!)
 

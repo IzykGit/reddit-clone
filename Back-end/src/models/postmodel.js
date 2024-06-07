@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const postSchema = new Schema({
-    title: String,
+    title: {type: String, required: true},
     body: String,
     comments: [{ body: String, date: Date }],
     date: { type: Date, default: Date.now }

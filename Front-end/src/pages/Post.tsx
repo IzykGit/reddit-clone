@@ -1,55 +1,49 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import Navbar from "../components/Navbar";
+import React, { useEffect, useState } from 'react'
+import Navbar from '../components/Navbar'
+import { useLocation } from 'react-router-dom'
+import axios from 'axios'
+
+
+
+// defining data
+interface Data {
+    name: string,
+    title: string,
+    body: string
+    _id: string
+  }
 
 
 const Post = () => {
 
-    const [title, setTitle] = useState("");
-    const [body, setBody] = useState("");
 
+    // grabbing post id from home page
+    const location = useLocation();
+    const postId = location.state.postId
+    console.log(postId)
 
-    const navigate = useNavigate()
+    const [post, setPost] = useState<Data | null>(null)
 
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-
-
-        try {
-
-            const response = await axios.post("http://localhost:5000/post", {
-            title,
-            body,
-            comments: [],
-            date: new Date()
-            });
-            console.log("Post created:", response.data);
-            navigate("/")
-        } catch (error) {
-            console.error("Error creating post:", error);
+    useEffect(() => {
+        const fetchPost = async () => {
+            await axios.get(`http://localhost:5000/post/${postId}`)
+            .then(response => {
+                setPost(response.data)
+                console.log(response.data)
+            })
         }
-        
-    };
 
-    
+        fetchPost()
+    }, [])
+
     return (
         <>
         <Navbar />
+
         <main>
-        <form onSubmit={handleSubmit}>
-            <div>
-            <label htmlFor="title">Title</label>
-            <input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
-            </div>
-            <div>
-            <label htmlFor="textcontent">Body</label>
-            <textarea id="textcontent" value={body} onChange={(e) => setBody(e.target.value)} />
-            </div>
-            <button type="submit">Create Post</button>
-        </form>
+            <h1>{post?.title}</h1>
         </main>
-    </>
+        </>
     )
 }
 
