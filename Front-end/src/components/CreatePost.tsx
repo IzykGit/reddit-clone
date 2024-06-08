@@ -11,6 +11,8 @@ const CreatePost = () => {
     const [file, setFile] = useState<File | null>(null)
     const [imageId, setImageId] = useState<string | null>(null)
 
+    const [disabled, setDisabled] = useState(false)
+
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
           setFile(event.target.files[0]);
@@ -18,6 +20,7 @@ const CreatePost = () => {
       };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        setDisabled(true)
         event.preventDefault();
 
         try {
@@ -39,6 +42,7 @@ const CreatePost = () => {
             });
             setBody("")
             setFile(null)
+            setDisabled(true)
             console.log("Post created:", response.data);
             window.location.reload()
         } catch (error) {
@@ -78,7 +82,8 @@ const CreatePost = () => {
                 <label htmlFor="file">Image</label>
                 <input id="file" type="file" onChange={handleFileChange}/>
             </div>
-            <button type="submit">Create Post</button>
+            <button type="submit"
+            disabled={disabled}>Create Post</button>
         </form>
     )
 }
