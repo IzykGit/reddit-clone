@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 
@@ -9,6 +9,7 @@ const CreatePost = () => {
     const [body, setBody] = useState("");
 
     const [file, setFile] = useState<File | null>(null)
+    const [imageId, setImageId] = useState<string | null>(null)
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -19,12 +20,12 @@ const CreatePost = () => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-
         try {
             const formData = new FormData();
             formData.append("body", body);
-            if(file) {
+            if(file && imageId) {
                 formData.append("file", file);
+                formData.append("imageId", imageId)
             }
             formData.append("date", new Date().toISOString());
 
@@ -43,6 +44,24 @@ const CreatePost = () => {
         }
         
     };
+
+    useEffect(() => {
+        if(file) {
+            const fileStr = `${file?.name}`;
+            console.log("File Str:", fileStr)
+
+            const timestamp = Date.now().toString(); // getting current timestamp
+            const randomNum = Math.floor(Math.random() * 1000000).toString(); // generating a random number
+      
+            const uniqueId = `${timestamp}-${randomNum}`;
+            setImageId(uniqueId);
+            console.log(uniqueId)
+        }
+        else {
+            return
+        }
+
+    }, [file])
 
     
     return (

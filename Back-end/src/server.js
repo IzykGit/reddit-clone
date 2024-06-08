@@ -89,14 +89,16 @@ app.get("/post/:id", async (req, res) => {
 // post creation page
 app.post("/post", upload.single('file'), async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI);
-  
+    
+
+
     try {
-      // handling post to s3
-      if (req.file) {
+        // handling post to s3
+        if (req.file) {
         
         const params = {
           Bucket: process.env.BUCKET_NAME,
-          Key: req.file.originalname,
+          Key: req.body.imageId,
           Body: req.file.buffer,
           ContentType: req.file.mimetype,
         };
@@ -108,17 +110,18 @@ app.post("/post", upload.single('file'), async (req, res) => {
         } catch (error) {
           console.error('S3 upload error:', error);
         }
-      } else {
-        console.log('No file found in the request');
-      }
+        } else {
+            console.log('No file found in the request');
+        }
+        
+
+        // handling post to mongodb
+        await client.connect();
+        const db = client.db('SocialApp');
+        const newPost = new Post(req.body);
+        await db.collection('posts').insertOne(newPost);
   
-      // handling post to mongodb
-      await client.connect();
-      const db = client.db('SocialApp');
-      const newPost = new Post(req.body);
-      await db.collection('posts').insertOne(newPost);
-  
-      res.status(201).json(newPost);
+        res.status(201).json(newPost);
     }
     catch (err) {
       console.error('Post creation failed:', err);
