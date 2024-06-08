@@ -24,10 +24,10 @@ import Post from './models/postmodel.js';
 
 // AWS Credentials
 const s3Client = new S3Client({
-    region: process.env.LINODE_REGION,
+    region: 'us-east-1',
     credentials: {
-      accessKeyId: process.env.LINODE_ACCESS_KEY,
-      secretAccessKey: process.env.LINODE_SECRET_KEY,
+      accessKeyId: process.env.ACCESS_KEY,
+      secretAccessKey: process.env.SECRET_KEY,
     },
     endpoint: 'https://us-east-1.linodeobjects.com',
   });
@@ -87,28 +87,47 @@ app.get("/post/:id", async (req, res) => {
 
 
 // post creation page
-app.post("/post", async (req, res) => {
-    const client = new MongoClient(process.env.MONGODB_URI)
-
+app.post("/post", upload.single('file'), async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI);
+  
     try {
-
-
-
-        await client.connect();
-        const db = client.db('SocialApp');
-        const newPost = new Post(req.body);
-        await db.collection('posts').insertOne(newPost)
-
-        res.status(201).json(newPost);
+      // handling post to s3
+      if (req.file) {
+        
+        const params = {
+          Bucket: process.env.BUCKET_NAME,
+          Key: req.file.originalname,
+          Body: req.file.buffer,
+          ContentType: req.file.mimetype,
+        };
+  
+        console.log('Uploading to S3 with params:', params);
+        
+        try {
+            await s3Client.send(new PutObjectCommand(params));
+        } catch (error) {
+          console.error('S3 upload error:', error);
+        }
+      } else {
+        console.log('No file found in the request');
+      }
+  
+      // handling post to mongodb
+      await client.connect();
+      const db = client.db('SocialApp');
+      const newPost = new Post(req.body);
+      await db.collection('posts').insertOne(newPost);
+  
+      res.status(201).json(newPost);
     }
     catch (err) {
-        console.error("Post failed:", err)
-        res.status(500).json({ message: `Post Failed: ${err}`})
+      console.error('Post creation failed:', err);
+      res.status(500).json({ message: `Post Failed: ${err}` });
     }
     finally {
-        await client.close()
+      await client.close();
     }
-})
+  });
 
 
 
