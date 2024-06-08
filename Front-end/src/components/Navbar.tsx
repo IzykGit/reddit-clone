@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom'
 const Navbar = () => {
   return (
     <div className={styles.nav_section}>
-        <div className={styles.title}>
-            <Link to={"/"}>Placeholder</Link>
+        <div>
+            <Link className={styles.title} to={"/"}>Placeholder</Link>
         </div>
         <nav className={styles.navbar}>
-            <a>Profile</a>
+            <Link to={"/createpost"} className={styles.navlink}>Create Post</Link>
             <a>Profile</a>
             <a>Profile</a>
             <a>Profile</a>

@@ -2,8 +2,10 @@
 
 import express from 'express'
 import bodyParser from 'body-parser'
+
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import multer from 'multer';
+import { Readable } from 'stream' 
 
 import cors from 'cors';
 
@@ -20,20 +22,27 @@ import { MongoClient } from 'mongodb';
 
 import Post from './models/postmodel.js';
 
-
+// AWS Credentials
 const s3Client = new S3Client({
-    region: process.env.BUCKET_REGION,
+    region: process.env.LINODE_REGION,
     credentials: {
-      accessKeyId:  `${process.env.ACCESS_KEY}`,
-      secretAccessKey: `${process.env.SECRET_KEY}`,
+      accessKeyId: process.env.LINODE_ACCESS_KEY,
+      secretAccessKey: process.env.LINODE_SECRET_KEY,
     },
     endpoint: 'https://us-east-1.linodeobjects.com',
   });
 
 
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+
+
+
+
 // fetching all posts from database
 app.get("/home", async (req, res) => {
-    const client = new MongoClient(process.env.MONGODB_URI!)
+    const client = new MongoClient(process.env.MONGODB_URI)
 
 
     try {
@@ -56,7 +65,7 @@ app.get("/home", async (req, res) => {
 //fetching specific post form database
 
 app.get("/post/:id", async (req, res) => {
-    const client = new MongoClient(process.env.MONGODB_URI!)
+    const client = new MongoClient(process.env.MONGODB_URI)
 
     const postId = new Types.ObjectId(req.params.id);
 
@@ -79,9 +88,12 @@ app.get("/post/:id", async (req, res) => {
 
 // post creation page
 app.post("/post", async (req, res) => {
-    const client = new MongoClient(process.env.MONGODB_URI!)
+    const client = new MongoClient(process.env.MONGODB_URI)
 
     try {
+
+
+
         await client.connect();
         const db = client.db('SocialApp');
         const newPost = new Post(req.body);
@@ -97,6 +109,20 @@ app.post("/post", async (req, res) => {
         await client.close()
     }
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // app.put('/api/posts/:userId/upvote', (req, res) => {
 //     const { userId } = req.params;
@@ -129,7 +155,27 @@ app.post("/post", async (req, res) => {
 // })
 
 
-mongoose.connect(process.env.MONGODB_URI!, {
+
+
+
+app.delete('/post/:id', async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI)
+
+    const postId = new Types.ObjectId(req.params.id);
+
+    try {
+        await client.connect();
+        const db = client.db('SocialApp');
+
+        db.collection("posts").deleteOne({ _id: postId })
+    }
+    catch (error) {
+        console.error(error)
+    }
+})
+
+
+mongoose.connect(process.env.MONGODB_URI, {
     dbName: "SocialApp"
 }).then(() => {
     app.listen(5000, () => {

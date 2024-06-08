@@ -3,28 +3,52 @@
 .home_main {
     display: grid;
     grid-template-columns: 0.25fr 0.5fr 0.25fr;
-    background-color: rgb(255, 255, 255);
+    grid-auto-rows: max-content;
+
+    background-color: white;
+    min-height: 100vh;
+    height: max-content;
+
+    gap: 2rem;
+    padding: 5rem 0rem;
+    
+    justify-items: flex-start;
 }
 
-.media_post_link {
+
+
+.media_post_div {
     color: black;
     text-decoration: none;
     grid-column: 2;
-
-    height: max-content;
 }
 
-.media_post {
-    border: 1px solid black;
-    padding: 1rem 4rem;
-}
-
-.post_title {
-    font-size: 2rem;
+.media_link {
+    color: black;
+    text-decoration: none;
 }
 
 .sort {
     grid-column: 3;
     grid-row: 1;
-    border: 1px solid black;
+
+    display: flex;
+    justify-content: center;
+}
+
+.sort > button {
+    height: 3rem;
+    width: 8rem;
+
+    font-size: 1.2rem;
+    font-weight: 700;
+
+    border: none;
+
+    cursor: pointer;
+}
+
+
+.delete_button {
+    width: 10rem;
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState } from "react"
 import axios from "axios"
 
 import { Link } from "react-router-dom"
@@ -6,6 +6,7 @@ import { Link } from "react-router-dom"
 import Navbar from "../components/Navbar"
 
 import styles from "../styles/Home.module.css"
+import CreatePost from "../components/CreatePost"
 
 
 // defining data
@@ -17,9 +18,9 @@ interface Data {
   date: Date
 }
 
-type PostDates = {
-  [key: string]: string;
-};
+// type PostDates = {
+//   [key: string]: string;
+// };
 
 const Home = () => {
 
@@ -29,29 +30,31 @@ const Home = () => {
 
   const [sort, setSort] = useState(false)
 
-  const [postDates, setPostDates] = useState<PostDates>({}); // Initialize with the correct type
+  const [postId, setPostId] = useState("")
+
+  // const [postDates, setPostDates] = useState<PostDates>({}); // Initialize with the correct type
 
 
-  // this useMemo calculates the dates of each post
-  useMemo(() => {
+  // // this useMemo calculates the dates of each post
+  // useMemo(() => {
 
-    const dates = data.reduce<PostDates>((acc, post) => {
-      const originDate = post.date;
-      const newDate = new Date(originDate);
+  //   const dates = data.reduce<PostDates>((acc, post) => {
+  //     const originDate = post.date;
+  //     const newDate = new Date(originDate);
 
-      const year = newDate.getFullYear();
-      const month = (newDate.getMonth() + 1).toString().padStart(2, '0');
-      const day = newDate.getDate().toString().padStart(2, '0');
+  //     const year = newDate.getFullYear();
+  //     const month = (newDate.getMonth() + 1).toString().padStart(2, '0');
+  //     const day = newDate.getDate().toString().padStart(2, '0');
 
-      const formattedDate = `${year}-${month}-${day}`;
+  //     const formattedDate = `${year}-${month}-${day}`;
 
-      acc[post._id] = formattedDate;
+  //     acc[post._id] = formattedDate;
 
-      return acc;
-    }, {});
+  //     return acc;
+  //   }, {});
 
-    setPostDates(dates);
-  }, [data]);
+  //   setPostDates(dates);
+  // }, [data]);
 
 
   useEffect(() => {
@@ -83,7 +86,30 @@ const Home = () => {
 
   }, [sort])
 
+  useEffect(() => {
 
+    // deleting post data from database
+    if(postId) {
+
+      try {
+        const fetchPost = async () => {
+          await axios.delete(`http://localhost:5000/post/${postId}`)
+        }
+
+        fetchPost()
+        window.location.reload()
+      }
+      catch (error) {
+        console.log(error)
+      }
+
+    }
+    else {
+        return
+    }
+
+
+}, [postId])
 
   // logging data
   useEffect(() => {
@@ -94,17 +120,31 @@ const Home = () => {
     <>
     <Navbar />
     <main className={styles.home_main}>
-        {data.map(post => (
-          <Link key={post._id} className={styles.media_post_link} to={`/post/${post._id}`} state={{ postId: post._id }}>
-            <div className={styles.media_post}>
-                <p className={styles.post_title} style={{fontWeight: "bold", fontSize: "1.5rem"}}>{post.title}</p>
-                <p>{post.body.length > 350 ? post.body.substring(0, 200) + "..." : post.body}</p>
+      <CreatePost />
 
-                {/* post dates */}
-                <p>{postDates[post._id]}</p>
+
+        {data.map(post => (
+            <div key={post._id} className={styles.media_post_div}>
+
+                <Link className={styles.media_link} to={`/post/${post._id}`} state={{ postId: post._id }}>
+
+                  <p className={styles.post_title} style={{fontWeight: "bold", fontSize: "1.5rem"}}>{post.title}</p>
+                  <p>{post.body}</p>
+
+                  {/* post dates */}
+                  {/* <p>{postDates[post._id]}</p> */}
+
+                </Link>
+                
+                <button onClick={() => setPostId(post._id)}
+                className={styles.delete_button}
+                type="button">Delete</button>
+
             </div>
-          </Link>
+
         ))}
+
+
         <div className={styles.sort}>
           <button onClick={() => setSort(!sort)}>Sort</button>
         </div>
