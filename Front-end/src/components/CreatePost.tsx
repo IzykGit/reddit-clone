@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Navbar from "../components/Navbar";
+
 
 
 const CreatePost = () => {
@@ -24,6 +24,8 @@ const CreatePost = () => {
             const formData = new FormData();
             formData.append("body", body);
             if(file && imageId) {
+
+                // setting file and imageId to form
                 formData.append("file", file);
                 formData.append("imageId", imageId)
             }
@@ -46,6 +48,8 @@ const CreatePost = () => {
     };
 
     useEffect(() => {
+        // generating a unique image identifier when image is uploaded
+
         if(file) {
             const fileStr = `${file?.name}`;
             console.log("File Str:", fileStr)

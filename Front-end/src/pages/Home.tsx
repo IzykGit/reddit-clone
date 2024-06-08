@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 
+import AOS from 'aos';
+import 'aos/dist/aos.css'
+
 import { Link } from "react-router-dom"
 
 import Navbar from "../components/Navbar"
@@ -15,8 +18,14 @@ interface Data {
   title: string,
   body: string,
   _id: string,
-  date: Date
+  date: Date,
+  imageId: string
 }
+
+interface Photos {
+  [key: string]: string;
+}
+
 
 // type PostDates = {
 //   [key: string]: string;
@@ -26,12 +35,15 @@ const Home = () => {
 
 
   // usestate to assign data
-  const [data, setData] = useState<Data[]>([])
+  const [posts, setPosts] = useState<Data[]>([])
+  
+  const [photos, setPhotos] = useState<Photos>({})
 
-  const [sort, setSort] = useState(false)
+  const [postId, setPostId] = useState("");
+  const [photoId, setPhotoId] = useState("");
 
-  const [postId, setPostId] = useState("")
 
+  const [loading, setLoading] = useState(true)
   // const [postDates, setPostDates] = useState<PostDates>({}); // Initialize with the correct type
 
 
@@ -56,35 +68,66 @@ const Home = () => {
   //   setPostDates(dates);
   // }, [data]);
 
+  useEffect(() => {
+    AOS.init({
+      duration: 500,
+      once: true
+    })
+  })
+
+
+
+
+  const fetchPosts = async () => {
+    await axios.get("http://localhost:5000/home")
+      .then(response => {
+        const sortedData = response.data.sort((a: Data, b: Data) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setPosts(sortedData);
+      })
+      .catch(error => console.error(error))
+  }
+
 
   useEffect(() => {
+    setLoading(true); // Set loading to true before fetching data
+    fetchPosts().then(() => setLoading(false)); // Set loading to false after fetching data
+  }, [])
 
-    if(!sort) {
-      // fetching all posts from database
-      const fetchData = async () => {
-        await axios.get("http://localhost:5000/home")
-        .then(response => {
-          const sortedData = response.data.sort((a: Data, b: Data) => new Date(b.date).getTime() - new Date(a.date).getTime());
-          setData(sortedData);
-        })
-        .catch(error => console.error(error))
+  
+  
+
+  const fetchImage = async (imageId: string) => {
+    try {
+
+      // fetching photos base on image id
+      const response = await axios.get(`http://localhost:5000/home/${imageId}`);
+      setPhotos((prevPhotos) => ({
+        ...prevPhotos,
+        [imageId]: response.data.image,
+      }));
+    } catch (error) {
+      console.error(`Error fetching image for imageId ${imageId}:`, error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      setLoading(true);
+      for (const post of posts) {
+        if (post.imageId && !photos[post.imageId]) {
+          await fetchImage(post.imageId);
+        }
       }
-      fetchData()
+      setLoading(false);
+    };
+    if (posts.length > 0) {
+      fetchImages();
     }
-    else if (sort) {
-            // fetching all posts from database
-            const fetchData = async () => {
-              await axios.get("http://localhost:5000/home")
-              .then(response => {
-                setData(response.data)
-              })
-              .catch(error => console.error(error))
-            }
-            fetchData()
-    }
+  }, [posts]);
 
 
-  }, [sort])
+
+
 
   useEffect(() => {
 
@@ -93,7 +136,7 @@ const Home = () => {
 
       try {
         const fetchPost = async () => {
-          await axios.delete(`http://localhost:5000/post/${postId}`)
+          await axios.delete(`http://localhost:5000/post/${postId}/${photoId}`)
         }
 
         fetchPost()
@@ -109,12 +152,12 @@ const Home = () => {
     }
 
 
-}, [postId])
+  }, [postId])
 
   // logging data
   useEffect(() => {
-    console.log("backend data:", data)
-  }, [data])
+    console.log("backend data:", posts)
+  }, [posts])
 
   return (
     <>
@@ -123,20 +166,25 @@ const Home = () => {
       <CreatePost />
 
 
-        {data.map(post => (
-            <div key={post._id} className={styles.media_post_div}>
+        {posts.map(post => (
+            <div data-aos="fade-down" key={post._id} className={styles.media_post_div}>
 
                 <Link className={styles.media_link} to={`/post/${post._id}`} state={{ postId: post._id }}>
+                  <div className={styles.post_body}>
+                    <p>{post.body}</p>
+                  </div>
 
-                  <p className={styles.post_title} style={{fontWeight: "bold", fontSize: "1.5rem"}}>{post.title}</p>
-                  <p>{post.body}</p>
 
-                  {/* post dates */}
-                  {/* <p>{postDates[post._id]}</p> */}
-
+                  {/* setting photo ids */}
+                  {photos[post.imageId] && (
+                    <img className={styles.post_image} src={`data:image/jpeg;base64,${photos[post.imageId]}`} alt="Post Image"/>
+                  )}
                 </Link>
                 
-                <button onClick={() => setPostId(post._id)}
+                <button onClick={() => {
+                  setPostId(post._id)
+                  setPhotoId(post.imageId)
+                }}
                 className={styles.delete_button}
                 type="button">Delete</button>
 
@@ -144,10 +192,6 @@ const Home = () => {
 
         ))}
 
-
-        <div className={styles.sort}>
-          <button onClick={() => setSort(!sort)}>Sort</button>
-        </div>
     </main>
     </>
   )

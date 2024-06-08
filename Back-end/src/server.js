@@ -3,9 +3,9 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import multer from 'multer';
-import { Readable } from 'stream' 
+import stream from 'stream';
 
 import cors from 'cors';
 
@@ -40,6 +40,16 @@ const upload = multer({ storage: storage });
 
 
 
+
+
+
+
+
+
+
+
+
+
 // fetching all posts from database
 app.get("/home", async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI)
@@ -51,6 +61,7 @@ app.get("/home", async (req, res) => {
         const db = client.db('SocialApp')
         const data = await db.collection('posts').find({}).toArray();
 
+        
         res.json(data)
     }
     catch (err) {
@@ -60,6 +71,36 @@ app.get("/home", async (req, res) => {
         await client.close()
     }
 });
+
+// fetching post images
+
+app.get("/home/:imageId", async (req, res) => {
+    const imageId = req.params.imageId
+    console.log(imageId)
+
+    const params = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: imageId,
+    };
+
+    try {
+        const data = await s3Client.send(new GetObjectCommand(params));
+        if (data.Body) {
+          const chunks = [];
+          data.Body.on('data', (chunk) => chunks.push(chunk));
+          data.Body.on('end', () => {
+            const buffer = Buffer.concat(chunks);
+            const base64 = buffer.toString('base64');
+            res.json({ image: base64 });
+          });
+        } else {
+          res.status(404).json({ message: 'Image not found' });
+        }
+      } catch (error) {
+        console.error('S3 fetch error:', error);
+        res.status(500).json({ message: error.message });
+      }
+})
 
 
 //fetching specific post form database
@@ -98,6 +139,8 @@ app.post("/post", upload.single('file'), async (req, res) => {
         
         const params = {
           Bucket: process.env.BUCKET_NAME,
+
+          // setting key to random generated image Id
           Key: req.body.imageId,
           Body: req.file.buffer,
           ContentType: req.file.mimetype,
@@ -106,6 +149,8 @@ app.post("/post", upload.single('file'), async (req, res) => {
         console.log('Uploading to S3 with params:', params);
         
         try {
+
+            // post image is sent to s3 bucket
             await s3Client.send(new PutObjectCommand(params));
         } catch (error) {
           console.error('S3 upload error:', error);
@@ -113,12 +158,17 @@ app.post("/post", upload.single('file'), async (req, res) => {
         } else {
             console.log('No file found in the request');
         }
+
+        const newPostData = {
+            ...req.body,
+            imageId: req.body.imageId, // save the generated image ID in the post data
+        };
         
 
         // handling post to mongodb
         await client.connect();
         const db = client.db('SocialApp');
-        const newPost = new Post(req.body);
+        const newPost = new Post(newPostData);
         await db.collection('posts').insertOne(newPost);
   
         res.status(201).json(newPost);
@@ -180,16 +230,22 @@ app.post("/post", upload.single('file'), async (req, res) => {
 
 
 
-app.delete('/post/:id', async (req, res) => {
+app.delete('/post/:id/:imageId', async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI)
-
+    const imageId = req.params.imageId
     const postId = new Types.ObjectId(req.params.id);
+
+    const params = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: imageId,
+    };
 
     try {
         await client.connect();
         const db = client.db('SocialApp');
 
         db.collection("posts").deleteOne({ _id: postId })
+        s3Client.send(new DeleteObjectCommand(params))
     }
     catch (error) {
         console.error(error)

@@ -21,6 +21,27 @@
     color: black;
     text-decoration: none;
     grid-column: 2;
+
+
+    width: 100%;
+}
+
+.media_link {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.post_body {
+    width: 100%;
+}
+
+.post_image {
+    min-width: auto;
+    max-width: 100%;
+
+    max-height: 30rem;
 }
 
 .media_link {
@@ -52,3 +73,4 @@
 .delete_button {
     width: 10rem;
 }
+
