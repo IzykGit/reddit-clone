@@ -17,7 +17,7 @@ app.use(bodyParser.json())
 app.use(cors());
 
 import mongoose, { Types } from 'mongoose';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 
 import Post from './models/postmodel.js';
@@ -76,7 +76,6 @@ app.get("/home", async (req, res) => {
 
 app.get("/home/:imageId", async (req, res) => {
     const imageId = req.params.imageId
-    console.log(imageId)
 
     const params = {
         Bucket: process.env.BUCKET_NAME,
@@ -196,35 +195,62 @@ app.post("/post", upload.single('file'), async (req, res) => {
 
 
 
-// app.put('/api/posts/:userId/upvote', (req, res) => {
-//     const { userId } = req.params;
-//     const post = postInfo.find(a => a.userId === userId)
-//     if(post) {
-//         post.upvotes += 1;
-//         res.send(`The article now has ${post.upvotes}`)
-//     }
-//     else {
-//         res.send("That post does not exist")
-//     }
+app.put('/:postId/like', async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI)
+    const postId = req.params.postId;
+    
+    console.log("attempting to like")
+    try {
+        console.log("in try")
+        await client.connect()
+        const db = client.db('SocialApp');
 
-// })
+        await db.collection("posts").updateOne(
+            {_id: new ObjectId(postId) },
+            { $inc: {likes: 1 }}
+        )
+        const post = await db.collection('socialapp').findOne({ _id: new ObjectId(postId) })
+
+        if(post) {
+            console.log("like made")
+            res.json(post)
+        }
+    }
+    catch (error) {
+        console.log("like failed")
+        console.error(error.message)
+    } 
+
+})
 
 
-// app.post('/api/posts/:userId/comment', (req, res) => {
+app.post('/posts/:postId/comment', async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI)
+    const { postId } = req.params
+    const { body, date } = req.body;
 
-//     const { userId } = req.params
-//     const { username, text } = req.body;
+    console.log("Attempting to comment")
 
-//     const post = postInfo.find(a => a.userId === userId);
 
-//     if (post) {
-//         post?.comments.push({ username, text });
-//         res.send(post.comments)
-//     }
-//     else {
-//         res.send("That post does not exist")
-//     }
-// })
+     try {
+        console.log("In try")
+        await client.connect()
+        const db = client.db('SocialApp')
+            
+        const post = await db.collection('posts').updateOne({ _id: new ObjectId(postId) }, {
+            $push: { comments: { body, date: new Date(date) }} 
+        })
+
+        console.log("Comment Made")
+        res.json(post)
+    }
+    catch (error) {
+            console.log(error)
+            res.status(500).json({ message: "Error:", error })
+    } finally {
+        await client.close();
+    }
+})
 
 
 
@@ -246,6 +272,7 @@ app.delete('/post/:id/:imageId', async (req, res) => {
 
         db.collection("posts").deleteOne({ _id: postId })
         s3Client.send(new DeleteObjectCommand(params))
+        console.log("deletion made")
     }
     catch (error) {
         console.error(error)

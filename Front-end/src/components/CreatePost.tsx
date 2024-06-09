@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import styles from '../styles/CreatePost.module.css'
 
 
 const CreatePost = () => {
@@ -33,6 +33,7 @@ const CreatePost = () => {
                 formData.append("imageId", imageId)
             }
             formData.append("date", new Date().toISOString());
+            formData.append("likes", `${0}`)
 
             // creating post
             const response = await axios.post("http://localhost:5000/post", formData, {
@@ -73,12 +74,12 @@ const CreatePost = () => {
 
     
     return (
-        <form onSubmit={handleSubmit}>
-            <div>
+        <form onSubmit={handleSubmit} className={styles.create_post}>
+            <div className={styles.inputs}>
                 <label htmlFor="textcontent">Body</label>
                 <textarea id="textcontent" value={body} onChange={(e) => setBody(e.target.value)} required/>
             </div>
-            <div>
+            <div className={styles.inputs}>
                 <label htmlFor="file">Image</label>
                 <input id="file" type="file" onChange={handleFileChange}/>
             </div>

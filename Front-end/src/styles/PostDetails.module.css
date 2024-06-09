@@ -1,0 +1,18 @@
+.main {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.detail_container {
+    border: 1px solid black;
+    width: 70%;
+    margin-bottom: 2rem;
+}
+
+.comment_container {
+    border: 1px solid black;
+    width: 70%;
+    min-height: 10rem;
+    height: max-content;
+}

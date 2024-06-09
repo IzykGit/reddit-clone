@@ -1,0 +1,18 @@
+
+.comment_post {
+    border: 1px solid black;
+    width: 70%;
+
+    display: flex;
+    flex-direction: column;
+
+    margin-bottom: 2rem;
+}
+
+.comment_post > textarea {
+    resize: vertical;
+}
+
+.comment_post > button {
+    width: 10rem;
+}

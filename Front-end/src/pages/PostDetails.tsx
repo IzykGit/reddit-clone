@@ -3,7 +3,9 @@ import Navbar from '../components/Navbar'
 import { useLocation } from 'react-router-dom'
 import axios from 'axios'
 
-// import styles from '../styles/Post.module.css'
+import styles from '../styles/PostDetails.module.css'
+
+import Comment from '../components/Comment'
 
 
 
@@ -44,6 +46,7 @@ const Post = () => {
                 await axios.get(`http://localhost:5000/post/${postId}`)
                 .then(response => {
                     setPost(response.data)
+                    console.log(post)
 
                     setComments(response.data.comments)
                     console.log(comments)
@@ -78,27 +81,39 @@ const Post = () => {
     }, [post?.date])
 
 
+
+
+
+
     console.log(comments)
     return (
         <>
         <Navbar />
 
-        <main>
-            <div>
+        <main className={styles.main}>
+            <div className={styles.detail_container}>
                 <h1>{post?.title}</h1>
                 <p>{post?.body}</p>
                 <p>{post?.username}</p>
                 <p>{postDate}</p>
             </div>
 
-            {comments.map((comment, index) => (
-                
-                // can now display comments, still need to fix comment date
-                <div key={index}>
-                    <p>{comment.body}</p>
+
+            <Comment postId={post?._id}/>
+
+            <div className={styles.comment_container}>
+                {comments.length === 0 ? (
+                    <p>No comments</p>
+                ) : comments.map((comment, index) => (
                     
-                </div>
-            ))}
+                    // can now display comments, still need to fix comment date
+                    <div key={index}>
+                        <p>{comment.body}</p>
+                        
+                    </div>
+                ))}
+            </div>
+
         </main>
         </>
     )
