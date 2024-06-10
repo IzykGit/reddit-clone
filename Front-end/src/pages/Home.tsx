@@ -10,8 +10,8 @@ import Navbar from "../components/Navbar"
 
 import styles from "../styles/Home.module.css"
 import CreatePost from "../components/CreatePost"
-import LikeButton from "../api/likePost";
 import DeleteButton from "../api/deletePost";
+
 
 
 // defining data
@@ -23,10 +23,16 @@ interface Data {
   date: Date,
   imageId: string,
   likes: number
+  comments: Comments[]
 }
 
 interface Photos {
   [key: string]: string;
+}
+
+interface Comments {
+  body: string,
+  date: Date
 }
 
 
@@ -46,7 +52,6 @@ const Home = () => {
 
   const [loading, setLoading] = useState(true)
 
-  
 
   useEffect(() => {
     AOS.init({
@@ -142,22 +147,29 @@ const Home = () => {
           {posts.map(post => (
               <div data-aos="fade-up" key={post._id} className={styles.media_post_div}>
 
-                  <Link className={styles.media_link} to={`/post/${post._id}`} state={{ postId: post._id, imageId: post.imageId }}>
-                    <div className={styles.post_body}>
-                      <p>{post.body}</p>
+                    <Link className={styles.media_link} to={`/post/${post._id}`} state={{ postId: post._id, imageId: post.imageId }}>
+                      <div className={styles.post_body}>
+                          <p>{post.body}</p>
+                      </div>
+
+
+                      {/* setting photo ids */}
+                      {photos[post.imageId] && (
+                          <img className={styles.post_image} src={`data:image/jpeg;base64,${photos[post.imageId]}`} alt="Post Image"/>
+                      )}
+                    </Link>
+                      
+                    <p>{post.likes}</p>
+                      
+                    <button type="button" onClick={() => { DeleteButton({id: post._id, imageId: post.imageId}); windowReload() }}>Delete</button>
+
+                    <div>
+                        {post.comments.length > 0 && (
+                          <div>
+                            <p>{post.comments[0].body}</p>
+                          </div>
+                        )}
                     </div>
-
-
-                    {/* setting photo ids */}
-                    {photos[post.imageId] && (
-                      <img className={styles.post_image} src={`data:image/jpeg;base64,${photos[post.imageId]}`} alt="Post Image"/>
-                    )}
-                  </Link>
-
-                  <p>{post.likes}</p>
-      
-                  <button type="button" onClick={() => LikeButton({id: post._id, likes: post.likes})}>Like</button>
-                  <button type="button" onClick={() => { DeleteButton({id: post._id, imageId: post.imageId}); windowReload() }}>Delete</button>
               </div>
 
             ))}

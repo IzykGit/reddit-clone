@@ -6,6 +6,8 @@ const Comment = ({ postId }: { postId: string }) => {
 
     const [body, setBody] = useState("")
 
+    const [disableButton, setDisableButton] = useState(false)
+
     const postComment = async (event: React.FormEvent<HTMLFormElement>) => {
 
         event.preventDefault();
@@ -22,6 +24,8 @@ const Comment = ({ postId }: { postId: string }) => {
                 },
             })
             console.log("Comment Made")
+            setBody("")
+            setDisableButton(!disableButton)
         }
         catch (error) {
             console.log(error)
@@ -31,9 +35,9 @@ const Comment = ({ postId }: { postId: string }) => {
     return (
         <form className={styles.comment_post} onSubmit={postComment}>
             <label htmlFor='comment'>leave a comment</label>
-            <textarea id='comment' value={body} onChange={(e) => setBody(e.target.value)}/>
+            <textarea id='comment' value={body} onChange={(e) => setBody(e.target.value)} required/>
 
-            <button type="submit">Post</button>
+            <button type="submit" disabled={disableButton}>Post</button>
         </form>
     )
 }

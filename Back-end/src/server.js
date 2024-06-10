@@ -191,7 +191,25 @@ app.post("/post", upload.single('file'), async (req, res) => {
 
 
 
+// app.get('/:postId/liked', async (req, res) => {
+//     const client = new MongoClient(process.env.MONGODB_URI)
+//     const postId = req.params.postId;
 
+//     try {
+//         await client.connect()
+//         const db = client.db('SocialApp');
+        
+//         const post = await db.collection('posts').findOne({ _id: new ObjectId(postId)})
+
+//         res.json(post.likes)
+//     }
+//     catch (error) {
+//         console.log(error)
+//     }
+//     finally {
+//         await client.close();
+//     }
+// })
 
 
 
@@ -223,6 +241,64 @@ app.put('/:postId/like', async (req, res) => {
 
 })
 
+app.put('/:postId/unlike', async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI)
+    const postId = req.params.postId;
+    
+    console.log("attempting to unlike")
+    try {
+        console.log("in try")
+        await client.connect()
+        const db = client.db('SocialApp');
+
+        await db.collection("posts").updateOne(
+            {_id: new ObjectId(postId) },
+            { $inc: {likes: -1 }}
+        )
+        const post = await db.collection('socialapp').findOne({ _id: new ObjectId(postId) })
+
+        if(post) {
+            console.log("like made")
+            res.json(post)
+        }
+    }
+    catch (error) {
+        console.log("like failed")
+        console.error(error.message)
+    } 
+
+})
+
+
+
+
+
+
+// fetching new comment after a comment is posted
+
+app.get('/post/:postId/comment', async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI)
+
+    const postId = req.params;
+
+    try {
+        await client.connect()
+        const db = client.db('SocialApp');
+
+        const post = await db.collection('posts').findOne({ _id: postId})
+
+        res.json(post.comments)
+    }
+    catch (error) {
+        res.status(500).json({ message: "Failed to make comment" })
+    }
+    finally {
+        await client.close()
+    }
+})
+
+
+// posting a new comment
 
 app.post('/posts/:postId/comment', async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI)
@@ -252,6 +328,19 @@ app.post('/posts/:postId/comment', async (req, res) => {
         await client.close();
     }
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

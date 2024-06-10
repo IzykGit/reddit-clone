@@ -2,12 +2,13 @@ import axios from 'axios'
 
 
 
-const LikeButton = async ({ id, likes }: { id: string, likes: number }) => {
+const likePost = async ({ id, likes }: { id: string, likes: number }) => {
 
     if(id) {
         try {
             await axios.put(`http://localhost:5000/${id}/like`, likes)
             console.log('post liked')
+            
         }
         catch (error) {
             console.log(error)
@@ -17,4 +18,4 @@ const LikeButton = async ({ id, likes }: { id: string, likes: number }) => {
     return 
 }
 
-export default LikeButton
+export default likePost

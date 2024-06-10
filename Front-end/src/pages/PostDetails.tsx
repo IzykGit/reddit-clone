@@ -6,6 +6,8 @@ import axios from 'axios'
 import styles from '../styles/PostDetails.module.css'
 
 import Comment from '../components/Comment'
+import likePost from '../api/likePost'
+import unlikePost from '../api/unlikePost'
 
 
 
@@ -40,11 +42,14 @@ const Post = () => {
     console.log(imageId)
 
     const [post, setPost] = useState<Data | null>(null)
+    const [postLikes, setPostLikes] = useState(post?.likes)
     const [media, setMedia] = useState("")
 
     const [comments, setComments] = useState<Comments[]>([])
 
     const [postDate, setPostDate] = useState("")
+    const [liked, setLiked] = useState(false)
+
 
     useEffect(() => {
 
@@ -53,6 +58,7 @@ const Post = () => {
             try {
               const response = await axios.get(`http://localhost:5000/post/${postId}`);
               setPost(response.data);
+              setPostLikes(response.data.likes)
               setComments(response.data.comments);
             } catch (error) {
               console.error('Error fetching post data:', error);
@@ -66,9 +72,21 @@ const Post = () => {
 
                 setMedia(imageUrl)
             } catch (error) {
-              console.error('Error fetching image:', error);
+                console.error('Error fetching image:', error);
             }
         };
+
+
+        // const fetchComments = async () => {
+        //     try {
+        //         const response = await axios.get(`http://localhost:5000/post/${postId}/comment`);
+
+        //         setComments(response.data.comment)
+        //     }
+        //     catch (error) {
+        //         console.log(error)
+        //     }
+        // }
       
         if (postId) {
             fetchPost();
@@ -77,6 +95,9 @@ const Post = () => {
         if (imageId) {
             fetchImage();
         }
+
+        // fetchComments()
+
 
     }, [postId, imageId])
 
@@ -116,7 +137,24 @@ const Post = () => {
                 <p>{post?.body}</p>
                 {media && <img src={media} alt="" className={styles.post_image}/>}
                 <p>{post?.username}</p>
+                <p>{postLikes ? postLikes : 0}</p>
                 <p>{postDate}</p>
+
+                <button type="button" onClick={() => {
+                    if(liked === false) {
+                        likePost({id: post!._id, likes: post!.likes})
+                        setPostLikes(postLikes! + 1)
+                    }
+                    else {
+                        unlikePost({id: post!._id, likes: post!.likes})
+                        setPostLikes(postLikes! - 1)
+                    }
+
+                    setTimeout(() => {
+                        setLiked(!liked)
+                    }, 50)
+
+                }}>Like</button>
             </div>
 
 
