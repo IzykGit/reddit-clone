@@ -20,20 +20,28 @@ interface Data {
     title: string,
     body: string,
     _id: string,
+    date: Date,
+    imageId: string,
+    likes: number,
     comments: Comments[]
-    date: string;
-  }
+}
+
 
 
 const Post = () => {
 
 
-    // grabbing post id from home page
+    // grabbing post and image id from home page
     const location = useLocation();
-    const postId = location.state.postId
+    const postId = location.state?.postId
+    const imageId = location.state?.imageId
+
     console.log(postId)
+    console.log(imageId)
 
     const [post, setPost] = useState<Data | null>(null)
+    const [media, setMedia] = useState("")
+
     const [comments, setComments] = useState<Comments[]>([])
 
     const [postDate, setPostDate] = useState("")
@@ -41,24 +49,36 @@ const Post = () => {
     useEffect(() => {
 
         // fetching post data from database
-        if(postId) {
-            const fetchPost = async () => {
-                await axios.get(`http://localhost:5000/post/${postId}`)
-                .then(response => {
-                    setPost(response.data)
-                    console.log(post)
-
-                    setComments(response.data.comments)
-                    console.log(comments)
-                })
+        const fetchPost = async () => {
+            try {
+              const response = await axios.get(`http://localhost:5000/post/${postId}`);
+              setPost(response.data);
+              setComments(response.data.comments);
+            } catch (error) {
+              console.error('Error fetching post data:', error);
             }
+        };
+        const fetchImage = async () => {
+            try {
+                const response = await axios.get(`http://localhost:5000/home/${imageId}`)
+                const base64Image = response.data.image;
+                const imageUrl = `data:image/jpeg;base64,${base64Image}`
 
-            fetchPost()
+                setMedia(imageUrl)
+            } catch (error) {
+              console.error('Error fetching image:', error);
+            }
+        };
+      
+        if (postId) {
+            fetchPost();
         }
-        else {
-            return
+      
+        if (imageId) {
+            fetchImage();
         }
-    }, [])
+
+    }, [postId, imageId])
 
     // formating the date to be displayed on post
 
@@ -94,6 +114,7 @@ const Post = () => {
             <div className={styles.detail_container}>
                 <h1>{post?.title}</h1>
                 <p>{post?.body}</p>
+                {media && <img src={media} alt="" className={styles.post_image}/>}
                 <p>{post?.username}</p>
                 <p>{postDate}</p>
             </div>

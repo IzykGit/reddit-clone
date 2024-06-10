@@ -16,3 +16,7 @@
     min-height: 10rem;
     height: max-content;
 }
+
+.post_image {
+    width: 100%;
+}

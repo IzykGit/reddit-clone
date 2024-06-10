@@ -142,7 +142,7 @@ const Home = () => {
           {posts.map(post => (
               <div data-aos="fade-up" key={post._id} className={styles.media_post_div}>
 
-                  <Link className={styles.media_link} to={`/post/${post._id}`} state={{ postId: post._id }}>
+                  <Link className={styles.media_link} to={`/post/${post._id}`} state={{ postId: post._id, imageId: post.imageId }}>
                     <div className={styles.post_body}>
                       <p>{post.body}</p>
                     </div>
