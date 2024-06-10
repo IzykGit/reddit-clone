@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import { useLocation } from 'react-router-dom'
 import axios from 'axios'
@@ -6,10 +6,10 @@ import axios from 'axios'
 import styles from '../styles/PostDetails.module.css'
 
 import Comment from '../components/Comment'
-import likePost from '../api/likePost'
-import unlikePost from '../api/unlikePost'
+// import likePost from '../api/likePost'
+// import unlikePost from '../api/unlikePost'
 
-import DeleteButton from "../api/deletePost";
+import DeleteFunc from "../api/deletePost.tsx";
 
 
 
@@ -36,6 +36,7 @@ interface Data {
 const Post = () => {
 
 
+
     // grabbing post and image id from home page
     const location = useLocation();
     const postId = location.state?.postId
@@ -51,9 +52,9 @@ const Post = () => {
     const [comments, setComments] = useState<Comments[]>([])
 
     const [postDate, setPostDate] = useState("")
-    const [liked, setLiked] = useState(false)
+    // const [liked, setLiked] = useState(false)
 
-    const [isLiked, setIsLiked] = useState("Like")
+    // const [isLiked, setIsLiked] = useState("Like")
 
 
     useEffect(() => {
@@ -80,18 +81,6 @@ const Post = () => {
                 console.error('Error fetching image:', error);
             }
         };
-
-
-        // const fetchComments = async () => {
-        //     try {
-        //         const response = await axios.get(`http://localhost:5000/post/${postId}/comment`);
-
-        //         setComments(response.data.comment)
-        //     }
-        //     catch (error) {
-        //         console.log(error)
-        //     }
-        // }
       
         if (postId) {
             fetchPost();
@@ -127,11 +116,19 @@ const Post = () => {
     }, [post?.date])
 
 
+    // refreshing the comments when a comment is made
+
     const refreshComments = async () => {
         const response = await axios.get(`http://localhost:5000/post/${postId}`);
         setComments(response.data.comments);
     }
 
+
+
+
+    // const manageLikeButton = () => {
+
+    // }
 
 
     console.log(comments)
@@ -148,7 +145,7 @@ const Post = () => {
                 <p>{postLikes ? `${postLikes} likes` : "0 likes"}</p>
                 <p>{postDate}</p>
 
-                <button type="button" onClick={() => {
+                {/* <button type="button" onClick={() => {
                     if(liked === false) {
                         likePost({id: post!._id, likes: post!.likes})
                         setPostLikes(postLikes! + 1)
@@ -160,20 +157,15 @@ const Post = () => {
                         setIsLiked("Like")
                     }
 
-                    setTimeout(() => {
-                        setLiked(!liked)
-                    }, 1000)
+                }} disabled={liked}>{isLiked}</button> */}
 
-                }}>{isLiked}</button>
 
-                <button type="button" onClick={() => {
-                    if(post?._id && post?.imageId)
-                    DeleteButton({id: post?._id, imageId: post?.imageId});
-                }}>Delete</button>
+
+                <DeleteFunc id={post?._id} imageId={post?.imageId} />
 
             </div>
 
-
+            
             <Comment refreshComments={refreshComments} postId={post?._id}/>
 
             <div className={styles.comment_container}>

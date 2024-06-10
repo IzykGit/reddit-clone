@@ -369,6 +369,7 @@ app.delete('/post/:id/:imageId', async (req, res) => {
         db.collection("posts").deleteOne({ _id: postId })
         s3Client.send(new DeleteObjectCommand(params))
         console.log("deletion made")
+        res.status(200).json({ message: "Post deleted successfully" })
     }
     catch (error) {
         console.error(error)

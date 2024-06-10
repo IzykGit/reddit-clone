@@ -5,7 +5,7 @@ const Navbar = () => {
   return (
     <div className={styles.nav_section}>
         <div>
-            <Link className={styles.title} to={"/"}>Placeholder</Link>
+            <Link className={styles.title} to={"/"}>Home Page</Link>
         </div>
         <nav className={styles.navbar}>
             <a>Profile</a>

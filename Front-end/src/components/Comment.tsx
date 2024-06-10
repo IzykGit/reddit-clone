@@ -1,16 +1,28 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import axios from "axios"
 import styles from '../styles/Comment.module.css'
 
-const Comment = ({ postId, refreshComments }: { postId: string, refreshComments: VoidFunction }) => {
+const Comment = ({ postId, refreshComments }: { postId: string | undefined, refreshComments: VoidFunction }) => {
 
     const [body, setBody] = useState("")
 
+    const [clicked, setClicked] = useState(false)
 
+    const [disabled, setDisabled] = useState(true)
+
+    useEffect(() => {
+        if(disabled === false) {
+            setDisabled(true)
+        }
+        else {
+            setDisabled(false)
+        }
+    }, [clicked])
 
     const postComment = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
+        setClicked(true)
 
         const commentData = {
             body,
@@ -18,19 +30,24 @@ const Comment = ({ postId, refreshComments }: { postId: string, refreshComments:
         };
 
         try {
-            await axios.post(`http://localhost:5000/posts/${postId}/comment`, commentData, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            })
-            console.log("Comment Made")
-            setBody("")
-            refreshComments()
-            
+            if(postId) {
+                await axios.post(`http://localhost:5000/posts/${postId}/comment`, commentData, {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                })
+                console.log("Comment Made")
+                setBody("")
+                refreshComments()
+            }
         }
         catch (error) {
             console.log(error)
         }
+        finally {
+            setClicked(false)
+        }
+
     }
 
     return (
@@ -38,7 +55,7 @@ const Comment = ({ postId, refreshComments }: { postId: string, refreshComments:
             <label htmlFor='comment'>leave a comment</label>
             <textarea id='comment' value={body} onChange={(e) => setBody(e.target.value)} required/>
 
-            <button type="submit">Post</button>
+            <button type="submit" disabled={disabled}>{disabled ? "..." : "Post"}</button>
         </form>
     )
 }

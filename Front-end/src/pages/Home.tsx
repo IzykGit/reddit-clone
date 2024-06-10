@@ -47,8 +47,6 @@ const Home = () => {
   
   const [photos, setPhotos] = useState<Photos>({})
 
-  const [reload, setReload] = useState(false)
-
   const [loading, setLoading] = useState(true)
 
 
@@ -115,19 +113,6 @@ const Home = () => {
     console.log("backend data:", posts)
   }, [posts])
 
-
-  useEffect(() => {
-    if(!reload) {
-      return
-    }
-    window.location.reload()
-  }, [reload])
-
-  const windowReload = () => {
-    setTimeout(() => {
-      setReload(!reload)
-    }, 100)
-  }
 
   return (
     <>
