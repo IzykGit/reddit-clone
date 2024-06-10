@@ -233,7 +233,7 @@ app.put('/:postId/like', async (req, res) => {
         console.log("like made")
         if(post) {
 
-            res.json(post)
+            res.status(200).json(post)
         }
     }
     catch (error) {
@@ -259,12 +259,8 @@ app.put('/:postId/unlike', async (req, res) => {
             {_id: new ObjectId(postId) },
             { $inc: {likes: -1 }}
         )
-        const post = await db.collection('socialapp').findOne({ _id: new ObjectId(postId) })
         console.log("unlike made")
-        if(post) {
-
-            res.json(post)
-        }
+        res.status(200)
     }
     catch (error) {
         console.log("like failed")
@@ -324,7 +320,7 @@ app.post('/posts/:postId/comment', async (req, res) => {
         })
 
         console.log("Comment Made")
-        res.json(post)
+        res.status(200).json(post)
     }
     catch (error) {
             console.log(error)

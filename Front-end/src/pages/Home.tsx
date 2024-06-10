@@ -11,6 +11,8 @@ import Navbar from "../components/Navbar"
 import styles from "../styles/Home.module.css"
 import CreatePost from "../components/CreatePost"
 
+import LikeHandler from "../components/LikeHandler";
+
 
 
 // defining data
@@ -142,8 +144,8 @@ const Home = () => {
                           <img className={styles.post_image} src={`data:image/jpeg;base64,${photos[post.imageId]}`} alt="Post Image"/>
                       )}
                     </Link>
-                      
-                    <p>{post.likes} likes</p>
+
+                    <LikeHandler postId={post._id} postLikes={post.likes} />
                       
 
                     <div>

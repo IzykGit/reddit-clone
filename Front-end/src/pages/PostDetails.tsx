@@ -6,10 +6,10 @@ import axios from 'axios'
 import styles from '../styles/PostDetails.module.css'
 
 import Comment from '../components/Comment'
-// import likePost from '../api/likePost'
-// import unlikePost from '../api/unlikePost'
 
 import DeleteFunc from "../api/deletePost.tsx";
+import LikeHandler from '../components/LikeHandler.tsx'
+
 
 
 
@@ -31,7 +31,16 @@ interface Data {
     comments: Comments[]
 }
 
-
+const defaultPost: Data = {
+    username: '',
+    title: '',
+    body: '',
+    _id: '',
+    date: new Date(),
+    imageId: '',
+    likes: 0,
+    comments: []
+};
 
 const Post = () => {
 
@@ -45,16 +54,12 @@ const Post = () => {
     console.log(postId)
     console.log(imageId)
 
-    const [post, setPost] = useState<Data | null>(null)
-    const [postLikes, setPostLikes] = useState(post?.likes)
+    const [post, setPost] = useState<Data>(defaultPost)
     const [media, setMedia] = useState("")
 
     const [comments, setComments] = useState<Comments[]>([])
 
     const [postDate, setPostDate] = useState("")
-    // const [liked, setLiked] = useState(false)
-
-    // const [isLiked, setIsLiked] = useState("Like")
 
 
     useEffect(() => {
@@ -64,7 +69,6 @@ const Post = () => {
             try {
                 const response = await axios.get(`http://localhost:5000/post/${postId}`);
                 setPost(response.data);
-                setPostLikes(response.data.likes)
                 setComments(response.data.comments)
             } catch (error) {
                 console.error('Error fetching post data:', error);
@@ -125,12 +129,6 @@ const Post = () => {
 
 
 
-
-    // const manageLikeButton = () => {
-
-    // }
-
-
     console.log(comments)
     return (
         <>
@@ -142,24 +140,11 @@ const Post = () => {
                 <p>{post?.body}</p>
                 {media && <img src={media} alt="" className={styles.post_image}/>}
                 <p>{post?.username}</p>
-                <p>{postLikes ? `${postLikes} likes` : "0 likes"}</p>
                 <p>{postDate}</p>
 
-                {/* <button type="button" onClick={() => {
-                    if(liked === false) {
-                        likePost({id: post!._id, likes: post!.likes})
-                        setPostLikes(postLikes! + 1)
-                        setIsLiked("Unlike")
-                    }
-                    else {
-                        unlikePost({id: post!._id, likes: post!.likes})
-                        setPostLikes(postLikes! - 1)
-                        setIsLiked("Like")
-                    }
-
-                }} disabled={liked}>{isLiked}</button> */}
 
 
+                <LikeHandler postId={post._id} postLikes={post.likes}/>
 
                 <DeleteFunc id={post?._id} imageId={post?.imageId} />
 
