@@ -2,15 +2,15 @@ import { useState } from "react"
 import axios from "axios"
 import styles from '../styles/Comment.module.css'
 
-const Comment = ({ postId }: { postId: string }) => {
+const Comment = ({ postId, refreshComments }: { postId: string, refreshComments: VoidFunction }) => {
 
     const [body, setBody] = useState("")
 
-    const [disableButton, setDisableButton] = useState(false)
+
 
     const postComment = async (event: React.FormEvent<HTMLFormElement>) => {
-
         event.preventDefault();
+
 
         const commentData = {
             body,
@@ -25,7 +25,8 @@ const Comment = ({ postId }: { postId: string }) => {
             })
             console.log("Comment Made")
             setBody("")
-            setDisableButton(!disableButton)
+            refreshComments()
+            
         }
         catch (error) {
             console.log(error)
@@ -37,7 +38,7 @@ const Comment = ({ postId }: { postId: string }) => {
             <label htmlFor='comment'>leave a comment</label>
             <textarea id='comment' value={body} onChange={(e) => setBody(e.target.value)} required/>
 
-            <button type="submit" disabled={disableButton}>Post</button>
+            <button type="submit">Post</button>
         </form>
     )
 }

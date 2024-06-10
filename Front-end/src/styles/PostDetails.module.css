@@ -11,11 +11,16 @@
 }
 
 .comment_container {
-    border: 1px solid black;
     width: 70%;
     min-height: 10rem;
     height: max-content;
 }
+
+.comment {
+    font-size: 1rem;
+    border: 1px solid black;
+}
+
 
 .post_image {
     width: 100%;

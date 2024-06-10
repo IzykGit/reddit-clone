@@ -9,6 +9,9 @@ import Comment from '../components/Comment'
 import likePost from '../api/likePost'
 import unlikePost from '../api/unlikePost'
 
+import DeleteButton from "../api/deletePost";
+
+
 
 
 // defining data
@@ -50,18 +53,20 @@ const Post = () => {
     const [postDate, setPostDate] = useState("")
     const [liked, setLiked] = useState(false)
 
+    const [isLiked, setIsLiked] = useState("Like")
+
 
     useEffect(() => {
 
         // fetching post data from database
         const fetchPost = async () => {
             try {
-              const response = await axios.get(`http://localhost:5000/post/${postId}`);
-              setPost(response.data);
-              setPostLikes(response.data.likes)
-              setComments(response.data.comments);
+                const response = await axios.get(`http://localhost:5000/post/${postId}`);
+                setPost(response.data);
+                setPostLikes(response.data.likes)
+                setComments(response.data.comments)
             } catch (error) {
-              console.error('Error fetching post data:', error);
+                console.error('Error fetching post data:', error);
             }
         };
         const fetchImage = async () => {
@@ -122,7 +127,10 @@ const Post = () => {
     }, [post?.date])
 
 
-
+    const refreshComments = async () => {
+        const response = await axios.get(`http://localhost:5000/post/${postId}`);
+        setComments(response.data.comments);
+    }
 
 
 
@@ -137,36 +145,45 @@ const Post = () => {
                 <p>{post?.body}</p>
                 {media && <img src={media} alt="" className={styles.post_image}/>}
                 <p>{post?.username}</p>
-                <p>{postLikes ? postLikes : 0}</p>
+                <p>{postLikes ? `${postLikes} likes` : "0 likes"}</p>
                 <p>{postDate}</p>
 
                 <button type="button" onClick={() => {
                     if(liked === false) {
                         likePost({id: post!._id, likes: post!.likes})
                         setPostLikes(postLikes! + 1)
+                        setIsLiked("Unlike")
                     }
                     else {
                         unlikePost({id: post!._id, likes: post!.likes})
                         setPostLikes(postLikes! - 1)
+                        setIsLiked("Like")
                     }
 
                     setTimeout(() => {
                         setLiked(!liked)
-                    }, 50)
+                    }, 1000)
 
-                }}>Like</button>
+                }}>{isLiked}</button>
+
+                <button type="button" onClick={() => {
+                    if(post?._id && post?.imageId)
+                    DeleteButton({id: post?._id, imageId: post?.imageId});
+                }}>Delete</button>
+
             </div>
 
 
-            <Comment postId={post?._id}/>
+            <Comment refreshComments={refreshComments} postId={post?._id}/>
 
             <div className={styles.comment_container}>
+                <p>Comments</p>
                 {comments.length === 0 ? (
                     <p>No comments</p>
                 ) : comments.map((comment, index) => (
                     
                     // can now display comments, still need to fix comment date
-                    <div key={index}>
+                    <div className={styles.comment} key={index}>
                         <p>{comment.body}</p>
                         
                     </div>

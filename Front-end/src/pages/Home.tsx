@@ -10,7 +10,6 @@ import Navbar from "../components/Navbar"
 
 import styles from "../styles/Home.module.css"
 import CreatePost from "../components/CreatePost"
-import DeleteButton from "../api/deletePost";
 
 
 
@@ -159,13 +158,13 @@ const Home = () => {
                       )}
                     </Link>
                       
-                    <p>{post.likes}</p>
+                    <p>{post.likes} likes</p>
                       
-                    <button type="button" onClick={() => { DeleteButton({id: post._id, imageId: post.imageId}); windowReload() }}>Delete</button>
 
                     <div>
                         {post.comments.length > 0 && (
                           <div>
+                            <p>Top Comment:</p>
                             <p>{post.comments[0].body}</p>
                           </div>
                         )}

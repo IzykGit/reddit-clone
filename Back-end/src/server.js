@@ -121,6 +121,9 @@ app.get("/post/:id", async (req, res) => {
         console.error("Error retrieving post:", error)
         res.status(404).json({ message: "Error"})
     }
+    finally {
+        await client.close()
+    }
 })
 
 
@@ -219,7 +222,6 @@ app.put('/:postId/like', async (req, res) => {
     
     console.log("attempting to like")
     try {
-        console.log("in try")
         await client.connect()
         const db = client.db('SocialApp');
 
@@ -228,16 +230,19 @@ app.put('/:postId/like', async (req, res) => {
             { $inc: {likes: 1 }}
         )
         const post = await db.collection('socialapp').findOne({ _id: new ObjectId(postId) })
-
+        console.log("like made")
         if(post) {
-            console.log("like made")
+
             res.json(post)
         }
     }
     catch (error) {
         console.log("like failed")
         console.error(error.message)
-    } 
+    }
+    finally {
+        await client.close()
+    }
 
 })
 
@@ -247,7 +252,6 @@ app.put('/:postId/unlike', async (req, res) => {
     
     console.log("attempting to unlike")
     try {
-        console.log("in try")
         await client.connect()
         const db = client.db('SocialApp');
 
@@ -256,15 +260,18 @@ app.put('/:postId/unlike', async (req, res) => {
             { $inc: {likes: -1 }}
         )
         const post = await db.collection('socialapp').findOne({ _id: new ObjectId(postId) })
-
+        console.log("unlike made")
         if(post) {
-            console.log("like made")
+
             res.json(post)
         }
     }
     catch (error) {
         console.log("like failed")
         console.error(error.message)
+    }
+    finally {
+        await client.close()
     } 
 
 })
@@ -309,7 +316,6 @@ app.post('/posts/:postId/comment', async (req, res) => {
 
 
      try {
-        console.log("In try")
         await client.connect()
         const db = client.db('SocialApp')
             
@@ -367,6 +373,7 @@ app.delete('/post/:id/:imageId', async (req, res) => {
     catch (error) {
         console.error(error)
     }
+
 })
 
 
