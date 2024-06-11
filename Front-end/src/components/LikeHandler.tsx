@@ -10,10 +10,13 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
     const { user } = useUser();
 
 
-    const [likes, setLikes] = useState(postLikes);
+    const [likes, setLikes] = useState(0);
     console.log(likes)
 
 
+    useEffect(() => {
+        setLikes(postLikes)
+    }, [postLikes, setLikes])
     
 
     const [alreadyLiked, setAlreadyLiked] = useState<boolean>(() => user ? likedIds.includes(user.uid) : false);

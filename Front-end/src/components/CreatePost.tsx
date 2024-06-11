@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import styles from '../styles/CreatePost.module.css'
 
+import useUser from "../hooks/useUser";
 
 const CreatePost = () => {
+
+    const { user } = useUser()
 
     // setting data for post body
     const [body, setBody] = useState("");
@@ -75,18 +78,24 @@ const CreatePost = () => {
 
     
     return (
-        <form onSubmit={handleSubmit} className={styles.create_post}>
-            <div className={styles.inputs}>
-                <label htmlFor="textcontent">Body</label>
-                <textarea id="textcontent" value={body} onChange={(e) => setBody(e.target.value)} required/>
-            </div>
-            <div className={styles.inputs}>
-                <label htmlFor="file">Image</label>
-                <input id="file" type="file" onChange={handleFileChange}/>
-            </div>
-            <button type="submit"
-            disabled={disabled}>Create Post</button>
-        </form>
+        <>
+        {user ? (
+            <form onSubmit={handleSubmit} className={styles.create_post}>
+                <div className={styles.inputs}>
+                    <label htmlFor="textcontent">Body</label>
+                    <textarea id="textcontent" value={body} onChange={(e) => setBody(e.target.value)} required/>
+                </div>
+                <div className={styles.inputs}>
+                    <label htmlFor="file">Image</label>
+                    <input id="file" type="file" onChange={handleFileChange}/>
+                </div>
+                <button type="submit"
+                disabled={disabled}>Create Post</button>
+            </form>
+        ) : (
+            <p>Log in to create post</p>
+        )}
+        </>
     )
 }
 

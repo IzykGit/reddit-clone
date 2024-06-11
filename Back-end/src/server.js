@@ -56,14 +56,14 @@ const upload = multer({ storage: storage });
 
 
 
-
+// verifying the authtoken
 app.use(async (req, res, next) => {
-    const authtoken = req.headers.authtoken;
+    const token = req.headers.authtoken;
 
     if(authtoken) {
 
         try {
-            req.user = await admin.auth().verifyIdToken(authtoken)
+            req.user = await admin.auth().verifyIdToken(token)
         }
         catch (e) {
             return res.status(400)
@@ -78,6 +78,18 @@ app.use(async (req, res, next) => {
     console.log(req.user)
     next();
 })
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -201,6 +213,8 @@ app.post("/post", upload.single('file'), async (req, res) => {
         } else {
             console.log('No file found in the request');
         }
+
+
 
         const newPostData = {
             ...req.body,

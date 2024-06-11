@@ -9,7 +9,8 @@ const postSchema = new Schema({
     imageId: String,
     date: { type: Date },
     likes: { type: Number, default: 0 },
-    likeIds: [{ likeIds: String }]
+    likeIds: [{ likeIds: String }],
+    userName: { type: String, required: true }
 })
 
 const Post = mongoose.model('Post', postSchema)

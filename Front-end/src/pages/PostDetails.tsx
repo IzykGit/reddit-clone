@@ -69,6 +69,7 @@ const Post = () => {
     const [postDate, setPostDate] = useState("")
 
 
+
     useEffect(() => {
 
         // fetching post data from database
@@ -83,7 +84,6 @@ const Post = () => {
                 const response = await axios.get(`http://localhost:5000/post/${postId}`, { headers });
                 setPost(response.data);
                 setComments(response.data.comments)
-
             } catch (error) {
                 console.error('Error fetching post data:', error);
             }
@@ -148,13 +148,14 @@ const Post = () => {
         <Navbar />
 
         <main className={styles.main}>
+        {post ? (
             <div className={styles.detail_container}>
+
                 <h1>{post?.title}</h1>
                 <p>{post?.body}</p>
                 {media && <img src={media} alt="" className={styles.post_image}/>}
                 <p>{post?.username}</p>
                 <p>{postDate}</p>
-
 
                 {/* like and unlike handler, see src/components/LikeHandler.tsx */}
                 <LikeHandler postId={post._id} postLikes={post.likes} likedIds={post.likedIds}/>
@@ -163,7 +164,11 @@ const Post = () => {
                 {/* deleting post handler, see src/api/deletePost.tsx */}
                 <DeleteFunc id={post?._id} imageId={post?.imageId} />
 
-            </div>
+            </div>   
+        ) : (
+            <p>No post</p>
+        )}
+
 
             
             <Comment refreshComments={refreshComments} postId={post?._id}/>
