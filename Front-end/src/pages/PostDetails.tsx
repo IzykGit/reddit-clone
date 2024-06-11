@@ -9,6 +9,7 @@ import Comment from '../components/Comment'
 
 import DeleteFunc from "../api/deletePost.tsx";
 import LikeHandler from '../components/LikeHandler.tsx'
+import useUser from '../hooks/useUser.ts'
 
 
 
@@ -28,9 +29,12 @@ interface Data {
     date: Date,
     imageId: string,
     likes: number,
-    comments: Comments[]
+    comments: Comments[],
+    likedIds: string[]
 }
 
+
+// default data incase a post isnt present
 const defaultPost: Data = {
     username: '',
     title: '',
@@ -39,26 +43,29 @@ const defaultPost: Data = {
     date: new Date(),
     imageId: '',
     likes: 0,
-    comments: []
+    comments: [],
+    likedIds: [""]
 };
 
 const Post = () => {
 
-
+    const { user } = useUser();
 
     // grabbing post and image id from home page
     const location = useLocation();
     const postId = location.state?.postId
     const imageId = location.state?.imageId
 
-    console.log(postId)
-    console.log(imageId)
-
+    // setting post state
     const [post, setPost] = useState<Data>(defaultPost)
+
+    // setting media state
     const [media, setMedia] = useState("")
 
+    // setting initial comments array
     const [comments, setComments] = useState<Comments[]>([])
 
+    // setting post date
     const [postDate, setPostDate] = useState("")
 
 
@@ -67,9 +74,16 @@ const Post = () => {
         // fetching post data from database
         const fetchPost = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/post/${postId}`);
+
+                // getting user token
+                const token = user && await user.getIdToken();
+                const headers = token ? { authtoken: token } : {}
+
+                // fetching with axios
+                const response = await axios.get(`http://localhost:5000/post/${postId}`, { headers });
                 setPost(response.data);
                 setComments(response.data.comments)
+
             } catch (error) {
                 console.error('Error fetching post data:', error);
             }
@@ -97,7 +111,7 @@ const Post = () => {
         }
 
 
-    }, [postId, imageId])
+    }, [postId, imageId, user])
 
     // formating the date to be displayed on post
 
@@ -129,7 +143,6 @@ const Post = () => {
 
 
 
-    console.log(comments)
     return (
         <>
         <Navbar />
@@ -144,7 +157,7 @@ const Post = () => {
 
 
                 {/* like and unlike handler, see src/components/LikeHandler.tsx */}
-                <LikeHandler postId={post._id} postLikes={post.likes}/>
+                <LikeHandler postId={post._id} postLikes={post.likes} likedIds={post.likedIds}/>
                 
 
                 {/* deleting post handler, see src/api/deletePost.tsx */}

@@ -9,7 +9,7 @@ const Navbar = () => {
         </div>
         <nav className={styles.navbar}>
             <Link to={"/login"}>Log In</Link>
-            <a>Profile</a>
+            <Link to={"/create-account"}>Create Account</Link>
             <a>Profile</a>
         </nav>
     </div>

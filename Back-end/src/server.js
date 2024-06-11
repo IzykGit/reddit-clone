@@ -11,6 +11,19 @@ import cors from 'cors';
 
 import 'dotenv/config'
 
+import fs from 'fs';
+import admin from 'firebase-admin'
+
+const credentials = JSON.parse(
+    fs.readFileSync('./credentials.json')
+)
+
+admin.initializeApp({
+    credential: admin.credential.cert(credentials)
+})
+
+
+
 const app = express();
 app.use(express());
 app.use(bodyParser.json())
@@ -30,7 +43,7 @@ const s3Client = new S3Client({
       secretAccessKey: process.env.SECRET_KEY,
     },
     endpoint: 'https://us-east-1.linodeobjects.com',
-  });
+});
 
 
 const storage = multer.memoryStorage();
@@ -44,7 +57,27 @@ const upload = multer({ storage: storage });
 
 
 
+app.use(async (req, res, next) => {
+    const authtoken = req.headers.authtoken;
 
+    if(authtoken) {
+
+        try {
+            req.user = await admin.auth().verifyIdToken(authtoken)
+        }
+        catch (e) {
+            return res.status(400)
+        }
+    }
+    else {
+        req.user = {}
+    }
+
+
+    req.user = req.user || {}
+    console.log(req.user)
+    next();
+})
 
 
 
@@ -109,13 +142,20 @@ app.get("/post/:id", async (req, res) => {
 
     const postId = new Types.ObjectId(req.params.id);
 
+    const { uid } = req.user;
     try {
         await client.connect();
 
         const db = client.db("SocialApp");
         const post = await db.collection('posts').findOne({ _id: postId })
         console.log(post)
-        res.json(post)
+
+        if(post) {
+            const likedIds = post.upvoteIds || [];
+            post.canLike = uid && !likedIds.includes(uid)
+            res.json(post)
+        }
+
     }
     catch (error) {
         console.error("Error retrieving post:", error)
@@ -147,7 +187,8 @@ app.post("/post", upload.single('file'), async (req, res) => {
           Body: req.file.buffer,
           ContentType: req.file.mimetype,
         };
-  
+        
+        // logging s3 params
         console.log('Uploading to S3 with params:', params);
         
         try {
@@ -216,25 +257,92 @@ app.post("/post", upload.single('file'), async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+app.use((req, res, next) => {
+
+    if (req.user) {
+        next()
+    }
+    else {
+        response.sendStatus(401)
+    }
+})
+
 app.put('/:postId/like', async (req, res) => {
+    // getting mongoclient
     const client = new MongoClient(process.env.MONGODB_URI)
+
+    // getting post id and user id
     const postId = req.params.postId;
+    const uid = req.user.uid
+    console.log(uid)
     
+
     console.log("attempting to like")
     try {
+
+        // conecting to client and database
         await client.connect()
         const db = client.db('SocialApp');
+        
 
-        await db.collection("posts").updateOne(
-            {_id: new ObjectId(postId) },
-            { $inc: {likes: 1 }}
-        )
-        const post = await db.collection('socialapp').findOne({ _id: new ObjectId(postId) })
-        console.log("like made")
+        // fetching original post
+        const post = await db.collection('posts').findOne({ _id: new ObjectId(postId) })
+
+        const likedIds = post.likedIds || [];
+        console.log(`Liked IDs: ${likedIds}`)
+
+        const canLike = uid && !likedIds.includes(uid)
+        console.log(`Can like: ${likedIds}`)
+        // checking if post exists
         if(post) {
 
-            res.status(200).json(post)
+            
+
+            // if user can like, update is sent
+            if(canLike) {
+                console.log("in here")
+                await db.collection("posts").updateOne(
+  
+                    {_id: new ObjectId(postId) },
+                    { 
+                        // incrementing likes by one
+                        $inc: {likes: 1 },
+
+                        // adding user id to the likeIds array of the post
+                        $push: { likedIds: uid }
+                    }
+                )
+            }
+            else {
+                res.status(400).json(false)
+            }
         }
+
+        // updated post
+        const updatedPost = await db.collection('posts').findOne({ _id: new ObjectId(postId) })
+
+
+        // checking if updated post exists
+        if(updatedPost) {
+
+            // displaying updated likeIds
+            console.log(updatedPost.likedIds)
+            console.log("like made")
+
+            // returning status and updated post
+            res.status(200).json(updatedPost)
+
+        }
+
+
     }
     catch (error) {
         console.log("like failed")
@@ -246,21 +354,58 @@ app.put('/:postId/like', async (req, res) => {
 
 })
 
+
+
+
 app.put('/:postId/unlike', async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI)
     const postId = req.params.postId;
-    
+    const uid = req.user.uid
+
+    console.log(uid)
+
     console.log("attempting to unlike")
     try {
         await client.connect()
         const db = client.db('SocialApp');
+    
+        const post = await db.collection('posts').findOne({ _id: new ObjectId(postId) })
+        console.log("got original post")
 
-        await db.collection("posts").updateOne(
-            {_id: new ObjectId(postId) },
-            { $inc: {likes: -1 }}
-        )
-        console.log("unlike made")
-        res.status(200)
+        const likedIds = post.likedIds || [];
+        console.log(`Liked IDs: ${likedIds}`)
+
+        const canUnLike = uid && likedIds.includes(uid)
+        console.log(`Can Unlike: ${canUnLike}`);
+
+        //  checking if post exists
+        if(post) {
+
+            console.log("post checked")
+            // removing like and userId from likedIds array
+            if(canUnLike) {
+                console.log("can unlike")
+                await db.collection("posts").updateOne(
+                    {_id: new ObjectId(postId) },
+                    {
+                        $inc: {likes: -1 },
+
+                        // removing the userId from the likedIds array
+                        $pull: { likedIds: uid }
+                    }
+                )
+            }
+        }
+        const updatedPost = await db.collection('posts').findOne({ _id: new ObjectId(postId) })
+
+        if(updatedPost) {
+            console.log("unlike made")
+            res.status(200).json(updatedPost)
+        }
+        else {
+            res.status(500).json({ message: "Failed to update post" })
+        }
+
     }
     catch (error) {
         console.log("like failed")
@@ -271,6 +416,19 @@ app.put('/:postId/unlike', async (req, res) => {
     } 
 
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -308,6 +466,8 @@ app.post('/posts/:postId/comment', async (req, res) => {
     const { postId } = req.params
     const { body, date } = req.body;
 
+    const { email } = req.user
+
     console.log("Attempting to comment")
 
 
@@ -316,7 +476,7 @@ app.post('/posts/:postId/comment', async (req, res) => {
         const db = client.db('SocialApp')
             
         const post = await db.collection('posts').updateOne({ _id: new ObjectId(postId) }, {
-            $push: { comments: { body, date: new Date(date) }} 
+            $push: { comments: { body, date: new Date(date), postedBy: email }} 
         })
 
         console.log("Comment Made")

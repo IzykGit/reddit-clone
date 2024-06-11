@@ -1,44 +1,90 @@
-import { useState } from "react"
-
-import likePost from "../api/likePost"
-import unlikePost from "../api/unlikePost"
+import { useEffect, useState } from "react"
+import axios from "axios"
+import { Link } from "react-router-dom"
 
 import useUser from "../hooks/useUser"
 
 
-const LikeHandler = ({ postId, postLikes }: { postId: string, postLikes: number }) => {
+const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLikes: number, likedIds: string[] }) => {
 
-    const { user, isLoading } = useUser();
+    const { user } = useUser();
 
-    const [handler, setHandler] = useState(false)
-    const [likes, setLikes] = useState(postLikes)
 
-    const handleLike = async () => {
+    const [likes, setLikes] = useState(postLikes);
+    console.log(likes)
 
-        if(handler === false) {
-            console.log("Like Clicked")
-            likePost({ id: postId, likes: postLikes})
-            setLikes(likes + 1)
-            setHandler(true)
+
+    
+
+    const [alreadyLiked, setAlreadyLiked] = useState<boolean>(() => user ? likedIds.includes(user.uid) : false);
+    const [clicked, setClicked] = useState(false);
+
+    const [disableButton, setDisableButton] = useState(false)
+
+    useEffect(() => {
+        if (user && Array.isArray(likedIds)) {
+            setAlreadyLiked(likedIds.includes(user.uid));
         }
-        else if (handler === true ) {
-            console.log("Unlike Clicked")
-            unlikePost({ id: postId, likes: postLikes})
-            setLikes(likes - 1)
-            setHandler(false)
+    }, [user, likedIds]);
+
+    const handleLikeUnlike = async () => {
+        setDisableButton(true)
+
+        if (postId) {
+            try {
+                const token = user && await user.getIdToken();
+                const headers = token ? { authtoken: token } : {};
+
+                if (alreadyLiked) {
+                    const response = await axios.put(`http://localhost:5000/${postId}/unlike`, null, { headers });
+                    console.log('post unliked');
+                    setLikes(response.data.likes);
+
+                    console.log("Updated post:", response)
+                    setAlreadyLiked(false);
+                    setDisableButton(false)
+
+                } else {
+                    const response = await axios.put(`http://localhost:5000/${postId}/like`, null, { headers });
+                    console.log('post liked');
+
+                    setLikes(response.data.likes);
+                    console.log("Updated post:", response)
+                    setAlreadyLiked(true);
+                    setDisableButton(false)
+                }
+            } catch (error) {
+                console.log(error);
+            }
         }
-    }
+    };
+
+
+    useEffect(() => {
+        if (clicked) {
+            handleLikeUnlike().finally(() => setClicked(false));
+        }
+    }, [clicked]);
 
     return (
         <>
         <div>
-            <p>{likes ? likes : "No Likes"}</p>
-
+            {/* checking to see if likes is greater than one */}
+            <p>{likes === 0 ? "No Likes" : likes}</p>
         </div>
-        {user ?
-            <button onClick={() => handleLike()} type="button">Like</button>
-            :
-            <p>Log in to like</p>
+        {user ? (
+            <div>
+                {/* determining if user can like post or unlike post */}
+                <button disabled={disableButton} type="button" onClick={() => setClicked(true)}>
+                    {alreadyLiked ? "Unlike" : "Like"}
+                </button>
+            </div>
+        ) : (
+            <div>
+                {/* if user it not logged in they will be asked to log in */}
+                <Link to={"/login"}>Log in to like post</Link>
+            </div>
+        )
         }
         </>
     )

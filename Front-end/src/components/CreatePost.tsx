@@ -34,6 +34,7 @@ const CreatePost = () => {
             }
             formData.append("date", new Date().toISOString());
             formData.append("likes", `${0}`)
+            formData.append("likedIds", JSON.stringify([]))
 
             // creating post
             const response = await axios.post("http://localhost:5000/post", formData, {

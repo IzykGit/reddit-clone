@@ -13,6 +13,7 @@ import CreatePost from "../components/CreatePost"
 
 import LikeHandler from "../components/LikeHandler";
 
+import useUser from "../hooks/useUser";
 
 
 // defining data
@@ -23,8 +24,9 @@ interface Data {
   _id: string,
   date: Date,
   imageId: string,
-  likes: number
-  comments: Comments[]
+  likes: number,
+  comments: Comments[],
+  likedIds: string[]
 }
 
 interface Photos {
@@ -37,12 +39,9 @@ interface Comments {
 }
 
 
-// type PostDates = {
-//   [key: string]: string;
-// };
-
 const Home = () => {
 
+  const { user } = useUser();
 
   // usestate to assign data
   const [posts, setPosts] = useState<Data[]>([])
@@ -63,7 +62,9 @@ const Home = () => {
 
 
   const fetchPosts = async () => {
-    await axios.get("http://localhost:5000/home")
+    const token = user && await user.getIdToken();
+    const headers = token ? { authtoken: token } : {}
+    await axios.get("http://localhost:5000/home", { headers })
       .then(response => {
         const sortedData = response.data.sort((a: Data, b: Data) => new Date(b.date).getTime() - new Date(a.date).getTime());
         setPosts(sortedData);
@@ -130,7 +131,10 @@ const Home = () => {
         <p>Loading...</p>
       ) : (
         <div>
-          {posts.map(post => (
+          {posts.length === 0 ? (
+            <p>No posts on your timeline!</p>
+          ) : (
+            posts.map(post => (
               <div data-aos="fade-up" key={post._id} className={styles.media_post_div}>
 
                     <Link className={styles.media_link} to={`/post/${post._id}`} state={{ postId: post._id, imageId: post.imageId }}>
@@ -147,7 +151,7 @@ const Home = () => {
 
                     
                     {/* like and unlike handler, see src/components/LikeHandler.tsx */}
-                    <LikeHandler postId={post._id} postLikes={post.likes} />
+                    <LikeHandler postId={post._id} postLikes={post.likes} likedIds={post.likedIds}/>
                       
 
                     <div>
@@ -160,7 +164,10 @@ const Home = () => {
                     </div>
               </div>
 
-            ))}
+            ))
+
+          )
+          }
           </div>
         )
       }
