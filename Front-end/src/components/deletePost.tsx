@@ -2,11 +2,14 @@ import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+import useUser from '../hooks/useUser'
 
 
-const DeleteFunc = ({ id, imageId }: { id: string | undefined, imageId: string | undefined }) => {
+const DeleteFunc = ({ postId, imageId }: { postId: string | undefined, imageId: string | undefined }) => {
 
     const navigate = useNavigate()
+
+    const { user } = useUser();
 
     const [completed, setCompleted] = useState(false)
 
@@ -21,7 +24,7 @@ const DeleteFunc = ({ id, imageId }: { id: string | undefined, imageId: string |
     }, [completed, navigate])
 
     const deletePost = async () => {
-        if(id) {
+        if(postId) {
             try {
                 console.log("Sending delete request")
 
@@ -40,11 +43,17 @@ const DeleteFunc = ({ id, imageId }: { id: string | undefined, imageId: string |
 
 
     return (
-        <div>
-            <button type='button' onClick={() => {
-                deletePost();
-            }}>Delete</button>
-        </div>
+        <>
+        {user.uid ? (
+            <div></div>
+        ) : (
+            <div>
+                <button type='button' onClick={() => {
+                    deletePost();
+                }}>Delete</button>
+            </div>
+        )}
+        </>
     )
 }
 

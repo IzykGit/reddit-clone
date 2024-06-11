@@ -11,7 +11,7 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
 
 
     const [likes, setLikes] = useState(0);
-    console.log(likes)
+
 
 
     useEffect(() => {

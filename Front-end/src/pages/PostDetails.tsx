@@ -7,7 +7,7 @@ import styles from '../styles/PostDetails.module.css'
 
 import Comment from '../components/Comment'
 
-import DeleteFunc from "../api/deletePost.tsx";
+import DeleteFunc from "../components/deletePost.tsx";
 import LikeHandler from '../components/LikeHandler.tsx'
 import useUser from '../hooks/useUser.ts'
 
@@ -162,7 +162,7 @@ const Post = () => {
                 
 
                 {/* deleting post handler, see src/api/deletePost.tsx */}
-                <DeleteFunc id={post?._id} imageId={post?.imageId} />
+                <DeleteFunc postId={post?._id} imageId={post?.imageId} />
 
             </div>   
         ) : (

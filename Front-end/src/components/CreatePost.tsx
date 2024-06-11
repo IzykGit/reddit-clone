@@ -30,7 +30,6 @@ const CreatePost = () => {
             const formData = new FormData();
             formData.append("body", body);
             if(file && imageId) {
-
                 // setting file and imageId to form
                 formData.append("file", file);
                 formData.append("imageId", imageId)
@@ -38,6 +37,7 @@ const CreatePost = () => {
             formData.append("date", new Date().toISOString());
             formData.append("likes", `${0}`)
             formData.append("likedIds", JSON.stringify([]))
+            formData.append("userId", user.uid)
 
             // creating post
             const response = await axios.post("http://localhost:5000/post", formData, {
