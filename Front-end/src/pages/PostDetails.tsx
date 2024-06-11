@@ -9,6 +9,7 @@ import Comment from '../components/Comment'
 
 import DeleteFunc from "../components/deletePost.tsx";
 import LikeHandler from '../components/LikeHandler.tsx'
+
 import useUser from '../hooks/useUser.ts'
 
 
@@ -22,7 +23,7 @@ interface Comments {
 }
 
 interface Data {
-    username: string,
+    userId: string,
     title: string,
     body: string,
     _id: string,
@@ -36,7 +37,7 @@ interface Data {
 
 // default data incase a post isnt present
 const defaultPost: Data = {
-    username: '',
+    userId: '',
     title: '',
     body: '',
     _id: '',
@@ -50,6 +51,7 @@ const defaultPost: Data = {
 const Post = () => {
 
     const { user } = useUser();
+    console.log(user)
 
     // grabbing post and image id from home page
     const location = useLocation();
@@ -154,7 +156,6 @@ const Post = () => {
                 <h1>{post?.title}</h1>
                 <p>{post?.body}</p>
                 {media && <img src={media} alt="" className={styles.post_image}/>}
-                <p>{post?.username}</p>
                 <p>{postDate}</p>
 
                 {/* like and unlike handler, see src/components/LikeHandler.tsx */}
@@ -162,8 +163,9 @@ const Post = () => {
                 
 
                 {/* deleting post handler, see src/api/deletePost.tsx */}
+                {user && post.userId === user.uid && (
                 <DeleteFunc postId={post?._id} imageId={post?.imageId} />
-
+                )}
             </div>   
         ) : (
             <p>No post</p>

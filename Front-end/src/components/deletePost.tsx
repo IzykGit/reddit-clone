@@ -11,6 +11,7 @@ const DeleteFunc = ({ postId, imageId }: { postId: string | undefined, imageId: 
 
     const { user } = useUser();
 
+
     const [completed, setCompleted] = useState(false)
 
     useEffect(() => {
@@ -28,7 +29,7 @@ const DeleteFunc = ({ postId, imageId }: { postId: string | undefined, imageId: 
             try {
                 console.log("Sending delete request")
 
-                await axios.delete(`http://localhost:5000/post/${id}/${imageId}`)
+                await axios.delete(`http://localhost:5000/post/${postId}/${imageId}`)
                 console.log("Finished")
                 setCompleted(true)
 
@@ -44,14 +45,14 @@ const DeleteFunc = ({ postId, imageId }: { postId: string | undefined, imageId: 
 
     return (
         <>
-        {user.uid ? (
-            <div></div>
-        ) : (
+        {user ? (
             <div>
                 <button type='button' onClick={() => {
                     deletePost();
                 }}>Delete</button>
             </div>
+        ) : (
+            <div></div>
         )}
         </>
     )

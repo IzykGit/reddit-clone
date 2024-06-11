@@ -14,11 +14,12 @@ import CreatePost from "../components/CreatePost"
 import LikeHandler from "../components/LikeHandler";
 
 import useUser from "../hooks/useUser";
+import DeleteFunc from "../components/deletePost";
 
 
 // defining data
 interface Data {
-  name: string,
+  userId: string,
   title: string,
   body: string,
   _id: string,
@@ -152,7 +153,10 @@ const Home = () => {
                     
                     {/* like and unlike handler, see src/components/LikeHandler.tsx */}
                     <LikeHandler postId={post._id} postLikes={post.likes} likedIds={post.likedIds}/>
-                      
+                    
+                    {user && post.userId === user.uid && (
+                      <DeleteFunc postId={post?._id} imageId={post?.imageId} />
+                    )}
 
                     <div>
                         {post.comments.length > 0 && (
