@@ -145,6 +145,8 @@ const Home = () => {
                       )}
                     </Link>
 
+                    
+                    {/* like and unlike handler, see src/components/LikeHandler.tsx */}
                     <LikeHandler postId={post._id} postLikes={post.likes} />
                       
 

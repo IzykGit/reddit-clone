@@ -2,7 +2,11 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import styles from '../styles/Comment.module.css'
 
+import useUser from "../hooks/useUser"
+
 const Comment = ({ postId, refreshComments }: { postId: string | undefined, refreshComments: VoidFunction }) => {
+
+    const { user, isLoading } = useUser();
 
     const [body, setBody] = useState("")
 
@@ -51,12 +55,21 @@ const Comment = ({ postId, refreshComments }: { postId: string | undefined, refr
     }
 
     return (
+        <>
+        {user ?
         <form className={styles.comment_post} onSubmit={postComment}>
             <label htmlFor='comment'>leave a comment</label>
             <textarea id='comment' value={body} onChange={(e) => setBody(e.target.value)} required/>
 
             <button type="submit" disabled={disabled}>{disabled ? "..." : "Post"}</button>
         </form>
+        :
+
+        <div>
+            <p>Log in to comment</p>
+        </div>
+        }
+        </>
     )
 }
 

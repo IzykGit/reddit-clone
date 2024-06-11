@@ -74,6 +74,8 @@ const Post = () => {
                 console.error('Error fetching post data:', error);
             }
         };
+
+        //fetching image from database
         const fetchImage = async () => {
             try {
                 const response = await axios.get(`http://localhost:5000/home/${imageId}`)
@@ -93,8 +95,6 @@ const Post = () => {
         if (imageId) {
             fetchImage();
         }
-
-        // fetchComments()
 
 
     }, [postId, imageId])
@@ -143,9 +143,11 @@ const Post = () => {
                 <p>{postDate}</p>
 
 
-
+                {/* like and unlike handler, see src/components/LikeHandler.tsx */}
                 <LikeHandler postId={post._id} postLikes={post.likes}/>
+                
 
+                {/* deleting post handler, see src/api/deletePost.tsx */}
                 <DeleteFunc id={post?._id} imageId={post?.imageId} />
 
             </div>

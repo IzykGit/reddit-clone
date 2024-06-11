@@ -3,9 +3,12 @@ import { useState } from "react"
 import likePost from "../api/likePost"
 import unlikePost from "../api/unlikePost"
 
+import useUser from "../hooks/useUser"
 
 
 const LikeHandler = ({ postId, postLikes }: { postId: string, postLikes: number }) => {
+
+    const { user, isLoading } = useUser();
 
     const [handler, setHandler] = useState(false)
     const [likes, setLikes] = useState(postLikes)
@@ -27,10 +30,17 @@ const LikeHandler = ({ postId, postLikes }: { postId: string, postLikes: number 
     }
 
     return (
+        <>
         <div>
             <p>{likes ? likes : "No Likes"}</p>
-            <button onClick={() => handleLike()} type="button">Like</button>
+
         </div>
+        {user ?
+            <button onClick={() => handleLike()} type="button">Like</button>
+            :
+            <p>Log in to like</p>
+        }
+        </>
     )
 }
 

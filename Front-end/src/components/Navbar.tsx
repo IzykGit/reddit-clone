@@ -8,7 +8,7 @@ const Navbar = () => {
             <Link className={styles.title} to={"/"}>Home Page</Link>
         </div>
         <nav className={styles.navbar}>
-            <a>Profile</a>
+            <Link to={"/login"}>Log In</Link>
             <a>Profile</a>
             <a>Profile</a>
         </nav>
