@@ -51,7 +51,6 @@ const defaultPost: Data = {
 const Post = () => {
 
     const { user } = useUser();
-    console.log(user)
 
     // grabbing post and image id from home page
     const location = useLocation();

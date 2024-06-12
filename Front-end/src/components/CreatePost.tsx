@@ -14,6 +14,8 @@ const CreatePost = () => {
     const [file, setFile] = useState<File | null>(null)
     const [imageId, setImageId] = useState<string | null>(null)
 
+    const [fileErr, setFileErr] = useState("")
+
     const [disabled, setDisabled] = useState(false)
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,6 +32,8 @@ const CreatePost = () => {
             const formData = new FormData();
             formData.append("body", body);
             if(file && imageId) {
+
+
                 // setting file and imageId to form
                 formData.append("file", file);
                 formData.append("imageId", imageId)
@@ -39,12 +43,11 @@ const CreatePost = () => {
             formData.append("likedIds", JSON.stringify([]))
             formData.append("userId", user.uid)
 
+            const token = user && await user.getIdToken();
+            const headers = token ? { authtoken: token, "Content-Type": "multipart/form-data" } : { "Content-Type": "multipart/form-data" };
+
             // creating post
-            const response = await axios.post("http://localhost:5000/post", formData, {
-                headers: {
-                "Content-Type": "multipart/form-data",
-                },
-            });
+            const response = await axios.post("http://localhost:5000/post", formData, { headers });
             setBody("")
             setFile(null)
             setDisabled(true)
@@ -58,8 +61,15 @@ const CreatePost = () => {
 
     useEffect(() => {
         // generating a unique image identifier when image is uploaded
-
+        const videoTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/wmv']
         if(file) {
+            if(videoTypes.includes(file.type)) {
+                setDisabled(true)
+                return setFileErr("Must be an image")
+            }
+            setFileErr("")
+            setDisabled(false)
+
             const fileStr = `${file?.name}`;
             console.log("File Str:", fileStr)
 
@@ -87,6 +97,7 @@ const CreatePost = () => {
                 </div>
                 <div className={styles.inputs}>
                     <label htmlFor="file">Image</label>
+                    <p>{fileErr.length == 0 ? "" : "Must be an image"}</p>
                     <input id="file" type="file" onChange={handleFileChange}/>
                 </div>
                 <button type="submit"

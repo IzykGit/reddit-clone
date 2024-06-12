@@ -13,7 +13,9 @@ const LoginPage = () => {
 
     const navigate = useNavigate();
 
-    const logIn = async () => {
+    const logIn = async (event: React.ChangeEvent<HTMLFormElement>) => {
+        event.preventDefault()
+
         try {
             await signInWithEmailAndPassword(getAuth(), email, password)
             navigate("/")
@@ -29,18 +31,21 @@ const LoginPage = () => {
         <Navbar />
         <h1>Log In</h1>
         {error && <p>{error}</p>}
-        <label htmlFor="email">Email:</label>
-        <input type="email" id="email"
-        placeholder="example@gmail.com" value={email}
-        onChange={e => setEmail(e.target.value)}/>
 
-        <label htmlFor="password">Password</label>
-        <input type="password" id="password"
-        placeholder=""value={password}
-        onChange={e => setPassword(e.target.value)}/>
+        <form onSubmit={logIn}>
+            <label htmlFor="email">Email:</label>
+            <input type="email" id="email"
+            placeholder="example@gmail.com" value={email}
+            autoComplete="email"
+            onChange={e => setEmail(e.target.value)}/>
 
-        <button type="button" onClick={logIn}>login</button>
-        <button type="button">create account</button>
+            <label htmlFor="password">Password</label>
+            <input type="password" id="password"
+            placeholder="" value={password} autoComplete="current-password"
+            onChange={e => setPassword(e.target.value)}/>
+
+            <button type="submit" >login</button>
+        </form>
 
         <Link to="/create-account">Don't have an account?</Link> 
         </>

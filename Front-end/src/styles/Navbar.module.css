@@ -11,6 +11,12 @@
     z-index: 2;
     background-color: white;
 }
+.nav_section > div {
+    display: flex;
+    justify-content: space-between;
+
+    width: 15rem;
+}
 
 .title {
     font-size: 2rem;

@@ -60,7 +60,7 @@ const upload = multer({ storage: storage });
 app.use(async (req, res, next) => {
     const token = req.headers.authtoken;
 
-    if(authtoken) {
+    if(token) {
 
         try {
             req.user = await admin.auth().verifyIdToken(token)
@@ -93,7 +93,8 @@ app.use(async (req, res, next) => {
 
 
 
-
+// // sorting posts by newest first
+// const sortedData = response.data.posts.sort((a: Data, b: Data) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 // fetching all posts from database
 app.get("/home", async (req, res) => {
@@ -101,13 +102,27 @@ app.get("/home", async (req, res) => {
 
 
     try {
+        const page = parseInt(req.query.page) || 1
+        const limit = parseInt(req.query.limit) || 10
+        const skip = (page - 1) * limit;
+
         await client.connect();
 
         const db = client.db('SocialApp')
-        const data = await db.collection('posts').find({}).toArray();
+        const postCollection = db.collection('posts')
+
+        const posts = await postCollection.find({}).sort({ date: -1 })
+        .skip(skip).limit(limit).toArray();
+
+        const totalPosts = await postCollection.countDocuments()
 
         
-        res.json(data)
+        res.json({
+            posts,
+            totalPosts,
+            totalPages: Math.ceil(totalPosts / limit),
+            currentPage: page
+        });
     }
     catch (err) {
         console.error("Error connecting to database", err)
@@ -185,7 +200,7 @@ app.get("/post/:id", async (req, res) => {
 app.post("/post", upload.single('file'), async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI);
     
-
+    console.log(req.headers.uid)
 
     try {
         // handling post to s3

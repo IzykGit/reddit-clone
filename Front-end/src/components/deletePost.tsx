@@ -14,10 +14,13 @@ const DeleteFunc = ({ postId, imageId }: { postId: string | undefined, imageId: 
 
     const [completed, setCompleted] = useState(false)
 
+    const [disabled, setDisabled] = useState(false)
+
     useEffect(() => {
         if(completed) {
             console.log("Navigating to home page")
             navigate("/")
+            window.location.reload()
         }
         else {
             return
@@ -25,6 +28,8 @@ const DeleteFunc = ({ postId, imageId }: { postId: string | undefined, imageId: 
     }, [completed, navigate])
 
     const deletePost = async () => {
+        setDisabled(true)
+
         if(postId) {
             try {
                 console.log("Sending delete request")
@@ -32,7 +37,7 @@ const DeleteFunc = ({ postId, imageId }: { postId: string | undefined, imageId: 
                 await axios.delete(`http://localhost:5000/post/${postId}/${imageId}`)
                 console.log("Finished")
                 setCompleted(true)
-
+                setDisabled(false)
             }
             catch (error) {
                 console.log(error)
@@ -47,7 +52,7 @@ const DeleteFunc = ({ postId, imageId }: { postId: string | undefined, imageId: 
         <>
         {user ? (
             <div>
-                <button type='button' onClick={() => {
+                <button disabled={disabled} type='button' onClick={() => {
                     deletePost();
                 }}>Delete</button>
             </div>

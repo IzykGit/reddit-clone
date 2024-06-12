@@ -13,6 +13,7 @@ const Navbar = () => {
     <div className={styles.nav_section}>
         <div>
             <Link className={styles.title} to={"/"}>Home Page</Link>
+            <p>V. 0.7</p>
         </div>
 
         {user ? (

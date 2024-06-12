@@ -15,7 +15,9 @@ const CreateAccountPage = () => {
     const navigate = useNavigate();
 
 
-    const createAccount = async () => {
+    const createAccount = async (event: React.ChangeEvent<HTMLFormElement>) => {
+        event.preventDefault()
+
         try {
             if (password !== confirmPassword) {
               setError("Passwords do not match");
@@ -36,22 +38,25 @@ const CreateAccountPage = () => {
         <Navbar />
         <h1>Create Account</h1>
         {error && <p>{error}</p>}
-        <label htmlFor="email">Email:</label>
-        <input type="email" id="email"
-        placeholder="example@gmail.com" value={email}
-        onChange={e => setEmail(e.target.value)}/>
 
-        <label htmlFor="password">Password</label>
-        <input type="password" id="password"
-        placeholder=""value={password}
-        onChange={e => setPassword(e.target.value)}/>
+        <form onSubmit={createAccount}>
+            <label htmlFor="email">Email:</label>
+            <input type="email" id="email"
+            placeholder="example@gmail.com" value={email}
+            onChange={e => setEmail(e.target.value)}/>
 
-        <label htmlFor="confirmpassword">ConfirmPassword</label>
-        <input type="password" id="confirmpassword"
-        placeholder="" value={confirmPassword}
-        onChange={e => setConfirmPassword(e.target.value)}/>
+            <label htmlFor="password">Password</label>
+            <input type="password" id="password"
+            placeholder=""value={password}
+            onChange={e => setPassword(e.target.value)}/>
 
-        <button type="button" onClick={createAccount}>Create Account</button>
+            <label htmlFor="confirmpassword">ConfirmPassword</label>
+            <input type="password" id="confirmpassword"
+            placeholder="" value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}/>
+
+            <button type="submit">Create Account</button>
+        </form>
 
         <Link to="/login">Have an account?</Link> 
         </>

@@ -46,6 +46,12 @@ const Home = () => {
 
   // usestate to assign data
   const [posts, setPosts] = useState<Data[]>([])
+
+  // keeping track of current page
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // keep track of number of pages
+  const [totalPages, setTotalPages] = useState(0);
   
   const [photos, setPhotos] = useState<Photos>({})
 
@@ -62,13 +68,18 @@ const Home = () => {
 
 
 
-  const fetchPosts = async () => {
+  const fetchPosts = async (page = 1) => {
     const token = user && await user.getIdToken();
     const headers = token ? { authtoken: token } : {}
-    await axios.get("http://localhost:5000/home", { headers })
+    await axios.get("http://localhost:5000/home", { headers, params: { page, limit: 10 } })
       .then(response => {
-        const sortedData = response.data.sort((a: Data, b: Data) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setPosts(sortedData);
+
+        // sorting posts by newest first
+        const sortedData = response.data.posts.sort((a: Data, b: Data) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setPosts(response.data.posts);
+        
+        setTotalPages(response.data.totalPages);
+        setCurrentPage(response.data.currentPage);
       })
       .catch(error => console.error(error))
   }
@@ -76,8 +87,8 @@ const Home = () => {
 
   useEffect(() => {
     setLoading(true); // Set loading to true before fetching data
-    fetchPosts().then(() => setLoading(false)); // Set loading to false after fetching data
-  }, [])
+    fetchPosts(currentPage).then(() => setLoading(false)); // Set loading to false after fetching data
+  }, [currentPage])
 
   
   
@@ -154,6 +165,9 @@ const Home = () => {
                     {/* like and unlike handler, see src/components/LikeHandler.tsx */}
                     <LikeHandler postId={post._id} postLikes={post.likes} likedIds={post.likedIds}/>
                     
+
+                    {/* if the post userId matches the current logged in user
+                    the user can make a delete request on that page */}
                     {user && post.userId === user.uid && (
                       <DeleteFunc postId={post?._id} imageId={post?.imageId} />
                     )}
@@ -175,6 +189,15 @@ const Home = () => {
           </div>
         )
       }
+
+      <div className={styles.pagination}>
+          <button type="button" onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
+              Previous
+          </button>
+          <button type="button" onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
+              Next
+          </button>
+      </div>
 
     </section>
 
