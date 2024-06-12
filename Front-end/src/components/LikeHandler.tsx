@@ -39,7 +39,7 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
                 const headers = token ? { authtoken: token } : {};
 
                 if (alreadyLiked) {
-                    const response = await axios.put(`http://localhost:5000/api/${postId}/unlike`, null, { headers });
+                    const response = await axios.put(`/api/${postId}/unlike`, null, { headers });
                     console.log('post unliked');
                     setLikes(response.data.likes);
 
@@ -48,7 +48,7 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
                     setDisableButton(false)
 
                 } else {
-                    const response = await axios.put(`http://localhost:5000/api/${postId}/like`, null, { headers });
+                    const response = await axios.put(`/api/${postId}/like`, null, { headers });
                     console.log('post liked');
 
                     setLikes(response.data.likes);

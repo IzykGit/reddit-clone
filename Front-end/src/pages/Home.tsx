@@ -71,7 +71,7 @@ const Home = () => {
   const fetchPosts = async (page = 1) => {
     const token = user && await user.getIdToken();
     const headers = token ? { authtoken: token } : {}
-    await axios.get("http://localhost:5000/api/home", { headers, params: { page, limit: 10 } })
+    await axios.get("/api/home", { headers, params: { page, limit: 10 } })
       .then(response => {
 
         
@@ -96,7 +96,7 @@ const Home = () => {
     try {
 
       // fetching photos base on image id
-      const response = await axios.get(`http://localhost:5000/api/home/${imageId}`);
+      const response = await axios.get(`/api/home/${imageId}`);
       setPhotos((prevPhotos) => ({
         ...prevPhotos,
         [imageId]: response.data.image,
