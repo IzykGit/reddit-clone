@@ -82,7 +82,7 @@ const Post = () => {
                 const headers = token ? { authtoken: token } : {}
 
                 // fetching with axios
-                const response = await axios.get(`http://localhost:5000/post/${postId}`, { headers });
+                const response = await axios.get(`http://localhost:5000/api/post/${postId}`, { headers });
                 setPost(response.data);
                 setComments(response.data.comments)
             } catch (error) {
@@ -93,7 +93,7 @@ const Post = () => {
         //fetching image from database
         const fetchImage = async () => {
             try {
-                const response = await axios.get(`http://localhost:5000/home/${imageId}`)
+                const response = await axios.get(`http://localhost:5000/api/home/${imageId}`)
                 const base64Image = response.data.image;
                 const imageUrl = `data:image/jpeg;base64,${base64Image}`
 
@@ -138,7 +138,7 @@ const Post = () => {
     // refreshing the comments when a comment is made
 
     const refreshComments = async () => {
-        const response = await axios.get(`http://localhost:5000/post/${postId}`);
+        const response = await axios.get(`http://localhost:5000/api/post/${postId}`);
         setComments(response.data.comments);
     }
 

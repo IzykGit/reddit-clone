@@ -6,7 +6,7 @@ import useUser from "../hooks/useUser"
 
 const Comment = ({ postId, refreshComments }: { postId: string | undefined, refreshComments: VoidFunction }) => {
 
-    const { user, isLoading } = useUser();
+    const { user } = useUser();
 
     const [body, setBody] = useState("")
 
@@ -35,7 +35,7 @@ const Comment = ({ postId, refreshComments }: { postId: string | undefined, refr
 
         try {
             if(postId) {
-                await axios.post(`http://localhost:5000/posts/${postId}/comment`, commentData, {
+                await axios.post(`http://localhost:5000/api/posts/${postId}/comment`, commentData, {
                     headers: {
                         "Content-Type": "application/json",
                     },

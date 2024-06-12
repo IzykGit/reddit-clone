@@ -7,6 +7,10 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } fro
 import multer from 'multer';
 import stream from 'stream';
 
+import path from 'path';
+
+import { fileURLToPath } from 'url';
+
 import cors from 'cors';
 
 import 'dotenv/config'
@@ -24,10 +28,15 @@ admin.initializeApp({
 
 
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename)
+
 const app = express();
 app.use(express());
 app.use(bodyParser.json())
 app.use(cors());
+
+app.use(express.static(path.join(__dirname, "../dist")))
 
 import mongoose, { Types } from 'mongoose';
 import { MongoClient, ObjectId } from 'mongodb';
@@ -52,6 +61,10 @@ const upload = multer({ storage: storage });
 
 
 
+
+app.get(/^(?!\/api).+/, (req, res) => {
+    res.sendFile(path.join(__dirname, "../dist/index.html"))
+})
 
 
 
@@ -92,12 +105,11 @@ app.use(async (req, res, next) => {
 
 
 
-
 // // sorting posts by newest first
 // const sortedData = response.data.posts.sort((a: Data, b: Data) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 // fetching all posts from database
-app.get("/home", async (req, res) => {
+app.get("/api/home", async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI)
 
 
@@ -134,7 +146,7 @@ app.get("/home", async (req, res) => {
 
 // fetching post images
 
-app.get("/home/:imageId", async (req, res) => {
+app.get("/api/home/:imageId", async (req, res) => {
     const imageId = req.params.imageId
 
     const params = {
@@ -164,7 +176,7 @@ app.get("/home/:imageId", async (req, res) => {
 
 //fetching specific post form database
 
-app.get("/post/:id", async (req, res) => {
+app.get("/api/post/:id", async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI)
 
     const postId = new Types.ObjectId(req.params.id);
@@ -197,7 +209,7 @@ app.get("/post/:id", async (req, res) => {
 
 
 // post creation page
-app.post("/post", upload.single('file'), async (req, res) => {
+app.post("/api/post", upload.single('file'), async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI);
     
     console.log(req.headers.uid)
@@ -304,7 +316,7 @@ app.use((req, res, next) => {
     }
 })
 
-app.put('/:postId/like', async (req, res) => {
+app.put('/api/:postId/like', async (req, res) => {
     // getting mongoclient
     const client = new MongoClient(process.env.MONGODB_URI)
 
@@ -386,7 +398,7 @@ app.put('/:postId/like', async (req, res) => {
 
 
 
-app.put('/:postId/unlike', async (req, res) => {
+app.put('/api/:postId/unlike', async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI)
     const postId = req.params.postId;
     const uid = req.user.uid
@@ -456,17 +468,9 @@ app.put('/:postId/unlike', async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
 // fetching new comment after a comment is posted
 
-app.get('/post/:postId/comment', async (req, res) => {
+app.get('/api/post/:postId/comment', async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI)
 
     const postId = req.params;
@@ -490,7 +494,7 @@ app.get('/post/:postId/comment', async (req, res) => {
 
 // posting a new comment
 
-app.post('/posts/:postId/comment', async (req, res) => {
+app.post('/api/posts/:postId/comment', async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI)
     const { postId } = req.params
     const { body, date } = req.body;
@@ -537,7 +541,7 @@ app.post('/posts/:postId/comment', async (req, res) => {
 
 
 
-app.delete('/post/:id/:imageId', async (req, res) => {
+app.delete('/api/post/:id/:imageId', async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI)
     const imageId = req.params.imageId
     const postId = new Types.ObjectId(req.params.id);
@@ -563,11 +567,15 @@ app.delete('/post/:id/:imageId', async (req, res) => {
 })
 
 
+
+const PORT = process.env.PORT || 5000
+
+
 mongoose.connect(process.env.MONGODB_URI, {
     dbName: "SocialApp"
 }).then(() => {
-    app.listen(5000, () => {
-        console.log("Connected on port 5000")
+    app.listen(PORT, () => {
+        console.log("Connected on PORT")
     })
 }).catch(error => {
     console.log(error)

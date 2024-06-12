@@ -34,7 +34,7 @@ const DeleteFunc = ({ postId, imageId }: { postId: string | undefined, imageId: 
             try {
                 console.log("Sending delete request")
 
-                await axios.delete(`http://localhost:5000/post/${postId}/${imageId}`)
+                await axios.delete(`http://localhost:5000/api/post/${postId}/${imageId}`)
                 console.log("Finished")
                 setCompleted(true)
                 setDisabled(false)

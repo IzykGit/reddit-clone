@@ -71,11 +71,10 @@ const Home = () => {
   const fetchPosts = async (page = 1) => {
     const token = user && await user.getIdToken();
     const headers = token ? { authtoken: token } : {}
-    await axios.get("http://localhost:5000/home", { headers, params: { page, limit: 10 } })
+    await axios.get("http://localhost:5000/api/home", { headers, params: { page, limit: 10 } })
       .then(response => {
 
-        // sorting posts by newest first
-        const sortedData = response.data.posts.sort((a: Data, b: Data) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        
         setPosts(response.data.posts);
         
         setTotalPages(response.data.totalPages);
@@ -97,7 +96,7 @@ const Home = () => {
     try {
 
       // fetching photos base on image id
-      const response = await axios.get(`http://localhost:5000/home/${imageId}`);
+      const response = await axios.get(`http://localhost:5000/api/home/${imageId}`);
       setPhotos((prevPhotos) => ({
         ...prevPhotos,
         [imageId]: response.data.image,
