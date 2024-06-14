@@ -138,7 +138,7 @@ const Post = () => {
     // refreshing the comments when a comment is made
 
     const refreshComments = async () => {
-        const response = await axios.get(`/api/post/${postId}`);
+        const response = await axios.get(`http://localhost:5000/api/post/${postId}`);
         setComments(response.data.comments);
     }
 

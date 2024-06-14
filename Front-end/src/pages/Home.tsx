@@ -63,7 +63,7 @@ const Home = () => {
       duration: 500,
       once: true
     })
-  })
+  }, [])
 
 
 
@@ -71,9 +71,8 @@ const Home = () => {
   const fetchPosts = async (page = 1) => {
     const token = user && await user.getIdToken();
     const headers = token ? { authtoken: token } : {}
-    await axios.get("/api/home", { headers, params: { page, limit: 10 } })
+    await axios.get("http://localhost:5000/api/home", { headers, params: { page, limit: 10 } })
       .then(response => {
-
         
         setPosts(response.data.posts);
         
@@ -96,7 +95,7 @@ const Home = () => {
     try {
 
       // fetching photos base on image id
-      const response = await axios.get(`/api/home/${imageId}`);
+      const response = await axios.get(`http://localhost:5000/api/home/${imageId}`);
       setPhotos((prevPhotos) => ({
         ...prevPhotos,
         [imageId]: response.data.image,

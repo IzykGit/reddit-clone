@@ -20,12 +20,12 @@ const Navbar = () => {
               <button className={styles.navlink} type='button' aria-label='Sign Out' onClick={() => {
                 signOut(getAuth())
               }}>Sign Out</button>
+              <Link to={"/profile"}>Profile</Link>
           </nav>
         ) : (
           <nav className={styles.navbar}>
               <Link className={styles.navlink} to={"/login"}>Log In</Link>
               <Link className={styles.navlink} to={"/create-account"}>Create Account</Link>
-              <a>Profile</a>
           </nav>
         )}
     </div>

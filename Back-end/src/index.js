@@ -7,9 +7,9 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } fro
 import multer from 'multer';
 import stream from 'stream';
 
-import path from 'path';
+// import path from 'path';
 
-import { fileURLToPath } from 'url';
+// import { fileURLToPath } from 'url';
 
 import cors from 'cors';
 
@@ -28,15 +28,15 @@ admin.initializeApp({
 
 
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename)
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename)
 
 const app = express();
 app.use(express());
 app.use(bodyParser.json())
 app.use(cors());
 
-app.use(express.static(path.join(__dirname, "../dist")))
+// app.use(express.static(path.join(__dirname, "../dist")))
 
 import mongoose, { Types } from 'mongoose';
 import { MongoClient, ObjectId } from 'mongodb';
@@ -62,9 +62,9 @@ const upload = multer({ storage: storage });
 
 
 
-app.get(/^(?!\/api).+/, (req, res) => {
-    res.sendFile(path.join(__dirname, "../dist/index.html"))
-})
+// app.get(/^(?!\/api).+/, (req, res) => {
+//     res.sendFile(path.join(__dirname, "../dist/index.html"))
+// })
 
 
 
@@ -88,7 +88,6 @@ app.use(async (req, res, next) => {
 
 
     req.user = req.user || {}
-    console.log(req.user)
     next();
 })
 
@@ -270,6 +269,71 @@ app.post("/api/post", upload.single('file'), async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+app.get("/api/user-check/:username", async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI)
+
+
+    try {
+        await client.connect()
+        const db = client.db('SocialApp');
+
+        const user = await db.collection('users').findOne({ userName: req.params })
+        console.log(user)
+
+        if(user) {
+            res.status(400).json({ exists: true })
+        }
+
+        res.status(200).json({ exists: false})
+    }
+    catch (error) {
+        res.status(400).json({ message: "Username already exists" })
+    }
+})
+
+
+
+
+
+
+app.post("/api/create-user", async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI);
+
+    const newUser = {
+        userName: req.body.userName,
+        userId: req.body.userId,
+        userEmail: req.body.userEmail,
+        date: req.body.date
+    };
+
+    try { 
+        await client.connect()
+        const db = client.db('SocialApp');
+        await db.collection('users').insertOne(newUser);
+
+        res.status(201).send("User added to MongoDB")
+    }
+    catch (error) {
+    console.error('Error adding user to MongoDB:', error);
+    res.status(500).send('Internal server error');
+    } finally {
+    await client.close();
+    }
+})
 
 
 
