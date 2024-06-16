@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import styles from '../styles/CreatePost.module.css'
 
-import useUser from "../hooks/useUser";
+import useUser from "../hooks/useUser"
 
 const CreatePost = () => {
 

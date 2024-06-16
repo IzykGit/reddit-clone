@@ -29,6 +29,7 @@ const Comment = ({ postId, refreshComments }: { postId: string | undefined, refr
         setClicked(true)
 
         const commentData = {
+            postedBy: user?.uid,
             body,
             date: new Date().toISOString(),
         };

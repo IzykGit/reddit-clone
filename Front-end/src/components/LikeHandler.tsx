@@ -7,7 +7,7 @@ import useUser from "../hooks/useUser"
 
 const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLikes: number, likedIds: string[] }) => {
 
-    const { user } = useUser();
+    const { user, isLoading } = useUser();
 
 
     const [likes, setLikes] = useState(0);
@@ -35,6 +35,8 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
 
         if (!user) return
 
+
+
         setDisableButton(true)
         const token = user && await user.getIdToken();
         const headers = token ? { authtoken: token } : {};
@@ -47,7 +49,8 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
                     const response = await axios({
                         method: "PUT",
                         url: `http://localhost:5000/api/${postId}/unlike`,
-                        headers: { Authorization: `${headers}` }
+                        data: null,
+                        headers: { Authorization: `Bearer ${headers}` }
                     });
 
                     console.log('post unliked');
@@ -62,7 +65,8 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
                     const response = await axios({
                         method: "PUT",
                         url: `http://localhost:5000/api/${postId}/like`,
-                        headers: { Authorization: `${headers}` }
+                        data: null,
+                        headers: { Authorization: `Bearer ${headers}` }
                     });
                     
                     console.log('post liked');

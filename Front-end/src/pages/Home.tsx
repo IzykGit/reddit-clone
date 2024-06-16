@@ -13,7 +13,7 @@ import CreatePost from "../components/CreatePost"
 
 import LikeHandler from "../components/LikeHandler";
 
-import useUser from "../hooks/useUser";
+import useUser from "../hooks/useUser"
 import DeleteFunc from "../components/deletePost";
 
 
@@ -43,6 +43,7 @@ interface Comments {
 const Home = () => {
 
   const { user } = useUser();
+
 
   // usestate to assign data
   const [posts, setPosts] = useState<Data[]>([])
@@ -171,7 +172,7 @@ const Home = () => {
 
                     
                     {/* like and unlike handler, see src/components/LikeHandler.tsx */}
-                    <LikeHandler postId={post._id} postLikes={post.likes} likedIds={post.likedIds}/>
+                    <LikeHandler postId={post!._id} postLikes={post!.likes} likedIds={post!.likedIds}/>
                       
 
                     {/* if the post userId matches the current logged in user

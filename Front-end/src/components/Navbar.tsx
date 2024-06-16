@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 import { getAuth, signOut } from 'firebase/auth'
 
-import useUser from '../hooks/useUser'
+import useUser from "../hooks/useUser"
 
 const Navbar = () => {
 

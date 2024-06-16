@@ -10,7 +10,7 @@ import Comment from '../components/Comment'
 import DeleteFunc from "../components/deletePost.tsx";
 import LikeHandler from '../components/LikeHandler.tsx'
 
-import useUser from '../hooks/useUser.ts'
+import useUser from "../hooks/useUser.ts"
 
 
 

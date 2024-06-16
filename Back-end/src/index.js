@@ -24,6 +24,7 @@ const credentials = JSON.parse(
     fs.readFileSync('./credentials.json')
 )
 
+
 admin.initializeApp({
     credential: admin.credential.cert(credentials)
 })
@@ -73,14 +74,18 @@ const upload = multer({ storage: storage });
 
 // verifying the authtoken
 app.use(async (req, res, next) => {
+
     const token = req.headers.authtoken;
+
 
     if(token) {
 
         try {
             req.user = await admin.auth().verifyIdToken(token)
+            console.log(`Verified user ID: ${req.user.uid}`)
         }
         catch (e) {
+            console.log("Invalid authtoken")
             return res.status(400)
         }
     }
@@ -88,8 +93,6 @@ app.use(async (req, res, next) => {
         req.user = {}
     }
 
-
-    req.user = req.user || {}
     next();
 })
 
@@ -396,9 +399,11 @@ app.use((req, res, next) => {
         next()
     }
     else {
-        response.sendStatus(401)
+        res.sendStatus(401)
     }
 })
+
+
 
 app.put('/api/:postId/like', async (req, res) => {
     // getting mongoclient
@@ -406,11 +411,12 @@ app.put('/api/:postId/like', async (req, res) => {
 
     // getting post id and user id
     const postId = req.params.postId;
-    const uid = req.user.uid
+    const userId = req.user.uid
 
-    console.log(uid)
+    console.log("Post ID is:", postId)
+    console.log("userId:", userId)
 
-    console.log("attempting to like")
+
     try {
 
         // conecting to client and database
@@ -420,7 +426,7 @@ app.put('/api/:postId/like', async (req, res) => {
 
         // fetching original post
         const post = await db.collection('posts').findOne({ _id: new ObjectId(postId) })
-        
+        console.log(post)
         
         if (!post) {
             return res.status(404).json({ message: "Post not found" });
@@ -429,23 +435,24 @@ app.put('/api/:postId/like', async (req, res) => {
         const likedIds = post.likedIds || [];
         console.log(`Liked IDs: ${likedIds}`)
 
-        const canLike = uid && !likedIds.includes(uid)
-        console.log(`Can like: ${likedIds}`)
+        const canLike = userId && !likedIds.includes(userId)
+        console.log(`Can like`)
 
         // checking if post exists
         if(canLike) {
 
             console.log("In like request")
-            
-                await db.collection("posts").updateOne(
+
+            await db.collection("posts").updateOne(
                 {_id: new ObjectId(postId) },
                 { 
                     // incrementing likes by one
                     $inc: {likes: 1 },
                     // adding user id to the likeIds array of the post
-                    $push: { likedIds: uid }
+                    $push: { likedIds: userId }
                 }
             )
+
         }
 
         // updated post
