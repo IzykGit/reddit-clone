@@ -71,11 +71,16 @@ const Home = () => {
   const fetchPosts = async (page = 1) => {
     const token = user && await user.getIdToken();
     const headers = token ? { authtoken: token } : {}
-    await axios.get("http://localhost:5000/api/home", { headers, params: { page, limit: 10 } })
+    await axios({
+      method: "GET",
+      url: "http://localhost:5000/api/home",
+      headers: { Authorization: `${headers}` }, 
+      params: { page, limit: 10 } 
+    })
       .then(response => {
         
         setPosts(response.data.posts);
-        
+
         setTotalPages(response.data.totalPages);
         setCurrentPage(response.data.currentPage);
       })
@@ -95,7 +100,11 @@ const Home = () => {
     try {
 
       // fetching photos base on image id
-      const response = await axios.get(`http://localhost:5000/api/home/${imageId}`);
+      const response = await axios({
+        method: "GET",
+        url: `http://localhost:5000/api/home/${imageId}`
+      });
+
       setPhotos((prevPhotos) => ({
         ...prevPhotos,
         [imageId]: response.data.image,
@@ -119,6 +128,7 @@ const Home = () => {
       fetchImages();
     }
   }, [posts]);
+
 
 
   // logging data
@@ -162,12 +172,12 @@ const Home = () => {
                     
                     {/* like and unlike handler, see src/components/LikeHandler.tsx */}
                     <LikeHandler postId={post._id} postLikes={post.likes} likedIds={post.likedIds}/>
-                    
+                      
 
                     {/* if the post userId matches the current logged in user
                     the user can make a delete request on that page */}
                     {user && post.userId === user.uid && (
-                      <DeleteFunc postId={post?._id} imageId={post?.imageId} />
+                      <DeleteFunc postId={post._id} imageId={post.imageId} />
                     )}
 
                     <div>

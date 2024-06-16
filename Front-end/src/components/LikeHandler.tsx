@@ -11,6 +11,7 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
 
 
     const [likes, setLikes] = useState(0);
+    
 
 
 
@@ -31,15 +32,24 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
     }, [user, likedIds]);
 
     const handleLikeUnlike = async () => {
+
+        if (!user) return
+
         setDisableButton(true)
+        const token = user && await user.getIdToken();
+        const headers = token ? { authtoken: token } : {};
 
         if (postId) {
             try {
-                const token = user && await user.getIdToken();
-                const headers = token ? { authtoken: token } : {};
+
 
                 if (alreadyLiked) {
-                    const response = await axios.put(`http://localhost:5000/api/${postId}/unlike`, null, { headers });
+                    const response = await axios({
+                        method: "PUT",
+                        url: `http://localhost:5000/api/${postId}/unlike`,
+                        headers: { Authorization: `${headers}` }
+                    });
+
                     console.log('post unliked');
                     setLikes(response.data.likes);
 
@@ -48,7 +58,13 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
                     setDisableButton(false)
 
                 } else {
-                    const response = await axios.put(`http://localhost:5000/api/${postId}/like`, null, { headers });
+
+                    const response = await axios({
+                        method: "PUT",
+                        url: `http://localhost:5000/api/${postId}/like`,
+                        headers: { Authorization: `${headers}` }
+                    });
+                    
                     console.log('post liked');
 
                     setLikes(response.data.likes);

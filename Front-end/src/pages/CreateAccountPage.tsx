@@ -31,7 +31,11 @@ const CreateAccountPage = () => {
             }
 
             // check if the username exists
-            const userDetailsCheckResponse = await axios.get(`http://localhost:5000/api/user-check/${userName}`);
+            const userDetailsCheckResponse = await axios({
+                method: "GET",
+                url: `http://localhost:5000/api/user-check/${userName}`
+            });
+            
             if (userDetailsCheckResponse.data.exists) {
                 setError("Username or Email already exists!");
                 return;
@@ -51,10 +55,11 @@ const CreateAccountPage = () => {
             };
 
             // save the user in mongodb 'users' collection
-            const response = await axios.post("http://localhost:5000/api/create-user", userData, {
-                headers: {
-                    'Content-Type': 'application/json',
-                }
+            const response = await axios({
+                method: "POST",
+                url: "http://localhost:5000/api/create-user",
+                data: userData,
+                headers: {'Content-Type': 'application/json'}
             });
             console.log(response.data);
 

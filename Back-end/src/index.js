@@ -7,11 +7,13 @@ import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } fro
 import multer from 'multer';
 import stream from 'stream';
 
-// import path from 'path';
+import path from 'path';
 
-// import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'url';
 
 import cors from 'cors';
+
+
 
 import 'dotenv/config'
 
@@ -405,8 +407,8 @@ app.put('/api/:postId/like', async (req, res) => {
     // getting post id and user id
     const postId = req.params.postId;
     const uid = req.user.uid
+
     console.log(uid)
-    
 
     console.log("attempting to like")
     try {
@@ -418,35 +420,32 @@ app.put('/api/:postId/like', async (req, res) => {
 
         // fetching original post
         const post = await db.collection('posts').findOne({ _id: new ObjectId(postId) })
+        
+        
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+        }
 
         const likedIds = post.likedIds || [];
         console.log(`Liked IDs: ${likedIds}`)
 
         const canLike = uid && !likedIds.includes(uid)
         console.log(`Can like: ${likedIds}`)
+
         // checking if post exists
-        if(post) {
+        if(canLike) {
 
+            console.log("In like request")
             
-
-            // if user can like, update is sent
-            if(canLike) {
-                console.log("in here")
                 await db.collection("posts").updateOne(
-  
-                    {_id: new ObjectId(postId) },
-                    { 
-                        // incrementing likes by one
-                        $inc: {likes: 1 },
-
-                        // adding user id to the likeIds array of the post
-                        $push: { likedIds: uid }
-                    }
-                )
-            }
-            else {
-                res.status(400).json(false)
-            }
+                {_id: new ObjectId(postId) },
+                { 
+                    // incrementing likes by one
+                    $inc: {likes: 1 },
+                    // adding user id to the likeIds array of the post
+                    $push: { likedIds: uid }
+                }
+            )
         }
 
         // updated post
@@ -461,8 +460,11 @@ app.put('/api/:postId/like', async (req, res) => {
             console.log("like made")
 
             // returning status and updated post
-            res.status(200).json(updatedPost)
+            return res.status(200).json(updatedPost)
 
+        }
+        else {
+            return res.status(400).json({ message: "Like Failed" })
         }
 
 
@@ -493,40 +495,38 @@ app.put('/api/:postId/unlike', async (req, res) => {
         const db = client.db('SocialApp');
     
         const post = await db.collection('posts').findOne({ _id: new ObjectId(postId) })
-        console.log("got original post")
+        
+        if(!post) {
+            return res.status(400).json({ message: "No Post" })
+        }
 
         const likedIds = post.likedIds || [];
         console.log(`Liked IDs: ${likedIds}`)
 
         const canUnLike = uid && likedIds.includes(uid)
         console.log(`Can Unlike: ${canUnLike}`);
-
-        //  checking if post exists
-        if(post) {
-
-            console.log("post checked")
             // removing like and userId from likedIds array
             if(canUnLike) {
+
                 console.log("can unlike")
                 await db.collection("posts").updateOne(
-                    {_id: new ObjectId(postId) },
-                    {
-                        $inc: {likes: -1 },
-
-                        // removing the userId from the likedIds array
-                        $pull: { likedIds: uid }
-                    }
-                )
-            }
+                {_id: new ObjectId(postId) },
+                {   
+                    // removing one like
+                    $inc: { likes: -1 },
+                    // removing the userId from the likedIds array
+                    $pull: { likedIds: uid }
+                }
+            )
         }
         const updatedPost = await db.collection('posts').findOne({ _id: new ObjectId(postId) })
 
         if(updatedPost) {
             console.log("unlike made")
-            res.status(200).json(updatedPost)
+            return res.status(200).json(updatedPost)
         }
         else {
-            res.status(500).json({ message: "Failed to update post" })
+            return res.status(500).json({ message: "Failed to update post" })
         }
 
     }
@@ -656,7 +656,7 @@ const PORT = process.env.PORT || 5000
 mongoose.connect(process.env.MONGODB_URI, {
     dbName: "SocialApp"
 }).then(() => {
-    app.listen(PORT, () => {
+    app.listen(5000, () => {
         console.log("Connected on PORT")
     })
 }).catch(error => {

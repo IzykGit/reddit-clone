@@ -51,7 +51,12 @@ const CreatePost = () => {
             const headers = token ? { authtoken: token, "Content-Type": "multipart/form-data" } : { "Content-Type": "multipart/form-data" };
 
             // creating post
-            const response = await axios.post("http://localhost:5000/api/post", formData, { headers });
+            const response = await axios({
+                method: "POST",
+                url: "http://localhost:5000/api/post",
+                data: formData,
+                headers: { Authorization: `${headers}` }
+            });
             setBody("")
             setFile(null)
             setDisabled(true)

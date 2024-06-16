@@ -35,7 +35,10 @@ const Comment = ({ postId, refreshComments }: { postId: string | undefined, refr
 
         try {
             if(postId) {
-                await axios.post(`http://localhost:5000/api/posts/${postId}/comment`, commentData, {
+                await axios({
+                    method: "POST",
+                    url: `http://localhost:5000/api/posts/${postId}/comment`,
+                    data: commentData,
                     headers: {
                         "Content-Type": "application/json",
                     },
