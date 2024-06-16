@@ -76,7 +76,8 @@ const upload = multer({ storage: storage });
 app.use(async (req, res, next) => {
 
     const token = req.headers.authtoken;
-
+    console.log("In authentication")
+    console.log(token)
 
     if(token) {
 
@@ -353,28 +354,28 @@ app.post("/api/create-user", async (req, res) => {
 
 
 
-app.get("/api/profile/:userId", async (req, res) => {
-    const client = new MongoClient(process.env.MONGODB_URI)
+// app.get("/api/profile/:userId", async (req, res) => {
+//     const client = new MongoClient(process.env.MONGODB_URI)
 
-    console.log(req.params.userId)
+//     console.log(req.params.userId)
 
-    try {
-        await client.connect();
-        const db = client.db("SocialApp");
+//     try {
+//         await client.connect();
+//         const db = client.db("SocialApp");
 
-        const posts = await db.collection('posts').find({ userId: req.params.userId })
-        .sort({ date: -1 }).toArray();
+//         const posts = await db.collection('posts').find({ userId: req.params.userId })
+//         .sort({ date: -1 }).toArray();
 
-        res.status(200).json(posts)
+//         res.status(200).json(posts)
 
-    }
-    catch (error) {
-        res.status(400).json({ message: "Error to find posts" })
-    }
-    finally {
-        await client.close()
-    }
-})
+//     }
+//     catch (error) {
+//         res.status(400).json({ message: "Error to find posts" })
+//     }
+//     finally {
+//         await client.close()
+//     }
+// })
 
 
 

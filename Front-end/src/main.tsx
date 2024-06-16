@@ -3,19 +3,19 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
+import 'dotenv'
+
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 
-
-
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCtLQ7vn0jBnnxyl7MsSZMWCJH91I4MMOE",
-  authDomain: "socialapp-f5c53.firebaseapp.com",
-  projectId: "socialapp-f5c53",
-  storageBucket: "socialapp-f5c53.appspot.com",
-  messagingSenderId: "847810504498",
-  appId: "1:847810504498:web:2a0d7b4434b85862a9992b",
-  measurementId: "G-637GQ8ZCE2"
+  apiKey: process.env.KEY!,
+  authDomain: "social-app-3310b.firebaseapp.com",
+  projectId: "social-app-3310b",
+  storageBucket: "social-app-3310b.appspot.com",
+  messagingSenderId: "456570024657",
+  appId: "1:456570024657:web:fa2f4d4c30a26475a38bf0"
 };
 
 // Initialize Firebase

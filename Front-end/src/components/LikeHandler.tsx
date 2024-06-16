@@ -39,8 +39,8 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
 
         setDisableButton(true)
         const token = user && await user.getIdToken();
-        const headers = token ? { authtoken: token } : {};
-
+        const headers = { Authorization: `Bearer ${token}` };
+        
         if (postId) {
             try {
 
@@ -49,8 +49,7 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
                     const response = await axios({
                         method: "PUT",
                         url: `http://localhost:5000/api/${postId}/unlike`,
-                        data: null,
-                        headers: { Authorization: `Bearer ${headers}` }
+                        headers: headers
                     });
 
                     console.log('post unliked');
@@ -66,7 +65,7 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
                         method: "PUT",
                         url: `http://localhost:5000/api/${postId}/like`,
                         data: null,
-                        headers: { Authorization: `Bearer ${headers}` }
+                        headers: headers
                     });
                     
                     console.log('post liked');
