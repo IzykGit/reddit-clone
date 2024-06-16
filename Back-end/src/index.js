@@ -340,25 +340,43 @@ app.post("/api/create-user", async (req, res) => {
 
 
 
-// app.get('/:postId/liked', async (req, res) => {
-//     const client = new MongoClient(process.env.MONGODB_URI)
-//     const postId = req.params.postId;
 
-//     try {
-//         await client.connect()
-//         const db = client.db('SocialApp');
-        
-//         const post = await db.collection('posts').findOne({ _id: new ObjectId(postId)})
 
-//         res.json(post.likes)
-//     }
-//     catch (error) {
-//         console.log(error)
-//     }
-//     finally {
-//         await client.close();
-//     }
-// })
+
+
+
+
+
+
+app.get("/api/profile/:userId", async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI)
+
+    console.log(req.params.userId)
+
+    try {
+        await client.connect();
+        const db = client.db("SocialApp");
+
+        const posts = await db.collection('posts').find({ userId: req.params.userId })
+        .sort({ date: -1 }).toArray();
+
+        res.status(200).json(posts)
+
+    }
+    catch (error) {
+        res.status(400).json({ message: "Error to find posts" })
+    }
+    finally {
+        await client.close()
+    }
+})
+
+
+
+
+
+
+
 
 
 
