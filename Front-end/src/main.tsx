@@ -3,16 +3,19 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-import 'dotenv/config'
+
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import {getAuth} from 'firebase/auth';
 import {initializeFirestore} from 'firebase/firestore';
 
+const key = import.meta.env.DB_PASSWORD!
+console.log(key)
+
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.KEY!,
+  apiKey: key,
   authDomain: "social-app-3310b.firebaseapp.com",
   projectId: "social-app-3310b",
   storageBucket: "social-app-3310b.appspot.com",

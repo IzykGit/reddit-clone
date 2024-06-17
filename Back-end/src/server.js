@@ -78,15 +78,15 @@ const upload = multer({ storage: storage });
 app.use(async (req, res, next) => {
 
     const authHeader = req.headers.authorization
-    console.log("In authentication")
+
 
 
     if(authHeader) {
         const token = authHeader.split(" ")[1];
-        console.log(token)
+
         try {
             req.user = await admin.auth().verifyIdToken(token)
-            console.log(`Verified user ID: ${req.user.uid}`)
+
         }
         catch (e) {
             console.log("Invalid authtoken", e)
@@ -249,17 +249,21 @@ app.post("/api/post", upload.single('file'), async (req, res) => {
             console.log('No file found in the request');
         }
 
+        await client.connect();
+        const db = client.db('SocialApp');
 
+        const userInfo = await db.collection('users').findOne({ userId: req.user.uid })
+        console.log("Username from userinfo:", userInfo.userName)
 
         const newPostData = {
             ...req.body,
             imageId: req.body.imageId, // save the generated image ID in the post data
+            userName: userInfo.userName
         };
         
 
         // handling post to mongodb
-        await client.connect();
-        const db = client.db('SocialApp');
+
         const newPost = new Post(newPostData);
         await db.collection('posts').insertOne(newPost);
   
@@ -378,6 +382,30 @@ app.get("/api/profile", async (req, res) => {
     }
 })
 
+
+app.get("/api/profile-visitor/:userName", async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI)
+
+    try {
+        await client.connect();
+        const db = client.db("SocialApp")
+
+        const posts = await db.collection('posts').find({ userName: req.params.userName })
+        .sort({ date: -1 }).toArray();
+
+        if(!posts) {
+            return res.status(400).json({ message: "No Posts Exist" })
+        }
+
+        res.status(200).json(posts)
+    }
+    catch (error) {
+        res.status(400).json({ message: "Error fetching posts" })
+    }
+    finally {
+        await client.close()
+    }
+})
 
 
 

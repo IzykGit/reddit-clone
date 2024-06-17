@@ -27,7 +27,8 @@ interface Data {
   imageId: string,
   likes: number,
   comments: Comments[],
-  likedIds: string[]
+  likedIds: string[],
+  userName: string
 }
 
 interface Photos {
@@ -160,8 +161,14 @@ const Home = () => {
           ) : (
             posts.map(post => (
               <div data-aos="fade-up" key={post._id} className={styles.media_post_div}>
+                    <Link to={`/profile/${post.userName}`} state={{ userName: post.userName }}>
+                      <p>{post.userName}</p>
+                    </Link>
 
+                    
                     <Link className={styles.media_link} to={`/post/${post._id}`} state={{ postId: post._id, imageId: post.imageId }}>
+
+                      
                       <div className={styles.post_body}>
                           <p>{post.body}</p>
                       </div>

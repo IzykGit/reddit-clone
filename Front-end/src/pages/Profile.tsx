@@ -1,8 +1,12 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
 
+import styles from '../styles/Profile.module.css'
+
 
 import useUser from "../hooks/useUser"
+
+import Navbar from "../components/Navbar"
 
 // defining data
 interface Data {
@@ -14,17 +18,18 @@ interface Data {
     imageId: string,
     likes: number,
     comments: Comments[],
-    likedIds: string[]
+    likedIds: string[],
+    userName: string
   }
   
 //   interface Photos {
 //     [key: string]: string;
 //   }
   
-  interface Comments {
+interface Comments {
     body: string,
     date: Date
-  }
+}
 
 const Profile = () => {
 
@@ -61,13 +66,20 @@ const Profile = () => {
     }, [user])
 
     return (
-        <main>
-            {posts.map(post => (
-                <div key={post._id}>
-                    <p>{post.body}</p>
-                </div>
-            ))}
+        <>
+        <Navbar />
+        <main className={styles.profile_main}>
+
+            <div>
+                {posts.map(post => (
+                    <div key={post._id}>
+                        <p>{post.body}</p>
+                    </div>
+                ))}
+            </div>
+
         </main>
+        </>
     )
 }
 
