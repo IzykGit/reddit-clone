@@ -5,9 +5,10 @@ import { Link } from "react-router-dom"
 import useUser from "../hooks/useUser"
 
 
+
 const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLikes: number, likedIds: string[] }) => {
 
-    const { user, isLoading } = useUser();
+    const { user } = useUser();
 
 
     const [likes, setLikes] = useState(0);
@@ -38,7 +39,8 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
 
 
         setDisableButton(true)
-        const token = user && await user.getIdToken();
+        const token = await user.getIdToken();
+        console.log("Token:", token)
         const headers = { Authorization: `Bearer ${token}` };
         
         if (postId) {

@@ -39,12 +39,12 @@ const Profile = () => {
         }
 
         try {
-            const token = user && await user.getIdToken();
-            const headers = token ? { authtoken: token } : {}
+            const token = await user?.getIdToken();
+            const headers = token ? { Authorization: `Bearer ${token}` } : {}
             const response = await axios({
                 method: 'GET',
-                url: `http://localhost:5000/api/profile/${user.uid}`,
-                headers: { Authorization: `${headers}`}
+                url: `http://localhost:5000/api/profile`,
+                headers: headers
             })
             console.log(response.data)
             setPosts(response.data)

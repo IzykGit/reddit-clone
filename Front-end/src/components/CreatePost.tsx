@@ -47,15 +47,15 @@ const CreatePost = () => {
             formData.append("likedIds", JSON.stringify([]))
             formData.append("userId", user.uid)
 
-            const token = user && await user.getIdToken();
-            const headers = token ? { authtoken: token, "Content-Type": "multipart/form-data" } : { "Content-Type": "multipart/form-data" };
+            const token = await user?.getIdToken();
+            const headers = token ? { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } : { "Content-Type": "multipart/form-data" };
 
             // creating post
             const response = await axios({
                 method: "POST",
                 url: "http://localhost:5000/api/post",
                 data: formData,
-                headers: { Authorization: `${headers}` }
+                headers: headers
             });
             setBody("")
             setFile(null)

@@ -78,14 +78,14 @@ const Post = () => {
             try {
 
                 // getting user token
-                const token = user && await user.getIdToken();
-                const headers = token ? { authtoken: token } : {}
+                const token = await user?.getIdToken();
+                const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
                 // fetching with axios
                 const response = await axios({
                     method: "GET",
                     url: `http://localhost:5000/api/post/${postId}`,
-                    headers: { Authorization: `${headers}` }
+                    headers: headers
                 });
                 setPost(response.data);
                 setComments(response.data.comments)
@@ -96,10 +96,14 @@ const Post = () => {
 
         //fetching image from database
         const fetchImage = async () => {
+
+            const token = await user?.getIdToken();
+            const headers = token ? { Authorization: `Bearer ${token}` } : {}
             try {
                 const response = await axios({
                     method: "GET",
-                    url: `http://localhost:5000/api/home/${imageId}`
+                    url: `http://localhost:5000/api/home/${imageId}`,
+                    headers: headers
                 })
                 const base64Image = response.data.image;
                 const imageUrl = `data:image/jpeg;base64,${base64Image}`

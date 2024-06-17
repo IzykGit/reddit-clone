@@ -20,6 +20,8 @@ import 'dotenv/config'
 import fs from 'fs';
 import admin from 'firebase-admin'
 
+
+
 const credentials = JSON.parse(
     fs.readFileSync('./credentials.json')
 )
@@ -75,19 +77,20 @@ const upload = multer({ storage: storage });
 // verifying the authtoken
 app.use(async (req, res, next) => {
 
-    const token = req.headers.authtoken;
+    const authHeader = req.headers.authorization
     console.log("In authentication")
-    console.log(token)
 
-    if(token) {
 
+    if(authHeader) {
+        const token = authHeader.split(" ")[1];
+        console.log(token)
         try {
             req.user = await admin.auth().verifyIdToken(token)
             console.log(`Verified user ID: ${req.user.uid}`)
         }
         catch (e) {
-            console.log("Invalid authtoken")
-            return res.status(400)
+            console.log("Invalid authtoken", e)
+            return res.status(400).json(e)
         }
     }
     else {
@@ -354,28 +357,26 @@ app.post("/api/create-user", async (req, res) => {
 
 
 
-// app.get("/api/profile/:userId", async (req, res) => {
-//     const client = new MongoClient(process.env.MONGODB_URI)
+app.get("/api/profile", async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI)
 
-//     console.log(req.params.userId)
+    try {
+        await client.connect();
+        const db = client.db("SocialApp");
 
-//     try {
-//         await client.connect();
-//         const db = client.db("SocialApp");
+        const posts = await db.collection('posts').find({ userId: req.user.uid })
+        .sort({ date: -1 }).toArray();
 
-//         const posts = await db.collection('posts').find({ userId: req.params.userId })
-//         .sort({ date: -1 }).toArray();
+        res.status(200).json(posts)
 
-//         res.status(200).json(posts)
-
-//     }
-//     catch (error) {
-//         res.status(400).json({ message: "Error to find posts" })
-//     }
-//     finally {
-//         await client.close()
-//     }
-// })
+    }
+    catch (error) {
+        res.status(400).json({ message: "Error to find posts" })
+    }
+    finally {
+        await client.close()
+    }
+})
 
 
 

@@ -70,22 +70,25 @@ const Home = () => {
 
 
   const fetchPosts = async (page = 1) => {
-    const token = user && await user.getIdToken();
-    const headers = token ? { authtoken: token } : {}
-    await axios({
-      method: "GET",
-      url: "http://localhost:5000/api/home",
-      headers: { Authorization: `${headers}` }, 
-      params: { page, limit: 10 } 
-    })
-      .then(response => {
-        
-        setPosts(response.data.posts);
-
-        setTotalPages(response.data.totalPages);
-        setCurrentPage(response.data.currentPage);
+    try {
+      const token = await user?.getIdToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {}
+      const response = await axios({
+        method: "GET",
+        url: "http://localhost:5000/api/home",
+        headers: headers,
+        params: { page, limit: 10 } 
       })
-      .catch(error => console.error(error))
+  
+          
+      setPosts(response.data.posts);
+  
+      setTotalPages(response.data.totalPages);
+      setCurrentPage(response.data.currentPage);
+    }
+    catch(error) {
+      console.log(error)
+    }
   }
 
 
