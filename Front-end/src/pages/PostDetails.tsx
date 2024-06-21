@@ -11,6 +11,7 @@ import DeleteFunc from "../components/deletePost.tsx";
 import LikeHandler from '../components/LikeHandler.tsx'
 
 import useUser from "../hooks/useUser.ts"
+import deleteComment from '../hooks/deleteComment.ts'
 
 
 
@@ -20,6 +21,11 @@ import useUser from "../hooks/useUser.ts"
 interface Comments {
     body: string,
     date: Date
+    postedBy: string,
+    id: string,
+    userId: string,
+    likes: number,
+    likedIds: string[]
 }
 
 interface Data {
@@ -68,6 +74,11 @@ const Post = () => {
 
     // setting post date
     const [postDate, setPostDate] = useState("")
+
+    // disabling delete button temporarily 
+    const [disabled, setDisabled] = useState(false)
+
+
 
 
 
@@ -149,11 +160,24 @@ const Post = () => {
     // refreshing the comments when a comment is made
 
     const refreshComments = async () => {
-        const response = await axios({
-            method: "GET",
-            url: `http://localhost:5000/api/post/${postId}`
-        });
-        setComments(response.data.comments);
+
+        setDisabled(true)
+
+        try {
+            const response = await axios({
+                method: "GET",
+                url: `http://localhost:5000/api/post/${postId}`
+            });
+            setComments(response.data.comments);
+            console.log(comments)
+        }
+        catch (error) {
+            console.log(error)
+        }
+        finally {
+            setDisabled(false)
+        }
+
     }
 
 
@@ -163,6 +187,9 @@ const Post = () => {
         <Navbar />
 
         <main className={styles.main}>
+
+        <div className={styles.content}>
+
         {post ? (
             <div className={styles.detail_container}>
 
@@ -196,11 +223,31 @@ const Post = () => {
                     
                     // can now display comments, still need to fix comment date
                     <div className={styles.comment} key={index}>
+                        <p>{comment.postedBy}</p>
                         <p>{comment.body}</p>
-                        
+
+                        {user?.uid === comment.userId ? (
+                            <button type='button'
+                            onClick={() => {
+                                deleteComment({ 
+                                    commentId: comment.id,
+                                    postId: post._id,
+                                    refreshComments                            
+                                })
+                                
+                                console.log(comment.id)
+                            }}   
+                            disabled={disabled}
+                            >Delete Comment</button>
+                        ) : (
+                            <p></p>
+                        )}
+
                     </div>
                 ))}
             </div>
+        </div>
+
 
         </main>
         </>

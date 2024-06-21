@@ -10,12 +10,10 @@ import { initializeApp } from "firebase/app";
 import {getAuth} from 'firebase/auth';
 import {initializeFirestore} from 'firebase/firestore';
 
-const key = import.meta.env.DB_PASSWORD!
-console.log(key)
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: key,
+  apiKey: "AIzaSyClaf6Su7Tl-xQ-B5KXKhp8ltplH9OOPX0",
   authDomain: "social-app-3310b.firebaseapp.com",
   projectId: "social-app-3310b",
   storageBucket: "social-app-3310b.appspot.com",

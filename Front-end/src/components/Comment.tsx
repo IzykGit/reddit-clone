@@ -29,20 +29,20 @@ const Comment = ({ postId, refreshComments }: { postId: string | undefined, refr
         setClicked(true)
 
         const commentData = {
-            postedBy: user?.uid,
             body,
             date: new Date().toISOString(),
         };
 
-        try {
+        try {   
+
+            const token = await user?.getIdToken();
+            const headers = token ? { Authorization: `Bearer ${token}`, "Content-Type": "application/json", } : {}
             if(postId) {
                 await axios({
                     method: "POST",
                     url: `http://localhost:5000/api/posts/${postId}/comment`,
                     data: commentData,
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    headers: headers
                 })
                 console.log("Comment Made")
                 setBody("")

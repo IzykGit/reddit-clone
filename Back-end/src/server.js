@@ -190,6 +190,7 @@ app.get("/api/post/:id", async (req, res) => {
     const postId = new Types.ObjectId(req.params.id);
 
     const { uid } = req.user;
+
     try {
         await client.connect();
 
@@ -235,8 +236,6 @@ app.post("/api/post", upload.single('file'), async (req, res) => {
           ContentType: req.file.mimetype,
         };
         
-        // logging s3 params
-        console.log('Uploading to S3 with params:', params);
         
         try {
 
@@ -361,6 +360,11 @@ app.post("/api/create-user", async (req, res) => {
 
 
 
+
+
+
+
+
 app.get("/api/profile", async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI)
 
@@ -371,7 +375,9 @@ app.get("/api/profile", async (req, res) => {
         const posts = await db.collection('posts').find({ userId: req.user.uid })
         .sort({ date: -1 }).toArray();
 
-        res.status(200).json(posts)
+        const user = await db.collection('users').findOne({ userId: req.user.uid })
+
+        res.status(200).json({posts, user})
 
     }
     catch (error) {
@@ -380,6 +386,33 @@ app.get("/api/profile", async (req, res) => {
     finally {
         await client.close()
     }
+})
+
+app.get("/api/profile/:imageId", async (req, res) => {
+    const imageId = req.params.imageId
+
+    const params = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: imageId,
+    };
+
+    try {
+        const data = await s3Client.send(new GetObjectCommand(params));
+        if (data.Body) {
+          const chunks = [];
+          data.Body.on('data', (chunk) => chunks.push(chunk));
+          data.Body.on('end', () => {
+            const buffer = Buffer.concat(chunks);
+            const base64 = buffer.toString('base64');
+            return res.json({ image: base64 });
+          });
+        } else {
+          return res.status(404).json({ message: 'Image not found' });
+        }
+      } catch (error) {
+        console.error('S3 fetch error:', error);
+        return res.status(500).json({ message: error.message });
+      }
 })
 
 
@@ -587,6 +620,20 @@ app.put('/api/:postId/unlike', async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // fetching new comment after a comment is posted
 
 app.get('/api/post/:postId/comment', async (req, res) => {
@@ -618,7 +665,6 @@ app.post('/api/posts/:postId/comment', async (req, res) => {
     const { postId } = req.params
     const { body, date } = req.body;
 
-    const { email } = req.user
 
     console.log("Attempting to comment")
 
@@ -626,9 +672,17 @@ app.post('/api/posts/:postId/comment', async (req, res) => {
      try {
         await client.connect()
         const db = client.db('SocialApp')
-            
+        
+        const user = await db.collection('users').findOne({ userId: req.user.uid })
+
         const post = await db.collection('posts').updateOne({ _id: new ObjectId(postId) }, {
-            $push: { comments: { body, date: new Date(date), postedBy: email }} 
+            $push: { comments: {
+                body,
+                date: new Date(date),
+                postedBy: user.userName,
+                id: new ObjectId(),
+                userId: req.user.uid
+            }} 
         })
 
         console.log("Comment Made")
@@ -643,7 +697,37 @@ app.post('/api/posts/:postId/comment', async (req, res) => {
     }
 })
 
+app.delete('/api/:post/:commentId/comment/delete', async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI)
 
+    const commentId = req.params.commentId;
+    const postId = req.params.post
+
+    console.log("Post Identifier:", postId)
+    console.log("Comment Identifier:", commentId)
+
+    console.log("Attempting to del comment")
+
+    try {
+        await client.connect();
+        const db = client.db("SocialApp");
+
+        console.log("Connected to database")
+
+        const result = await db.collection('posts').updateOne(
+            { _id: new ObjectId(postId) },
+            { $pull: { "comments": { id: new ObjectId(commentId) } }}
+        )
+
+        return res.status(200).json({ message: "comment deleted", result })
+    }
+    catch(error) {
+        return res.status(400).json(error)
+    }
+    finally {
+        await client.close()
+    }
+})
 
 
 

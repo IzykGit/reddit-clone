@@ -38,6 +38,7 @@ interface Photos {
 interface Comments {
   body: string,
   date: Date
+  postedBy: string
 }
 
 
@@ -148,7 +149,7 @@ const Home = () => {
     <main className={styles.home_main}>
 
 
-      <section className={styles.column_2}>
+      <section className={styles.content}>
         
       <CreatePost />
 
@@ -161,8 +162,8 @@ const Home = () => {
           ) : (
             posts.map(post => (
               <div data-aos="fade-up" key={post._id} className={styles.media_post_div}>
-                    <Link to={`/profile/${post.userName}`} state={{ userName: post.userName }}>
-                      <p>{post.userName}</p>
+                    <Link className={styles.post_username} to={`/profile/${post.userName}`} state={{ userName: post.userName }}>
+                      <h2 >{post.userName}</h2>
                     </Link>
 
                     
@@ -195,6 +196,7 @@ const Home = () => {
                         {post.comments.length > 0 && (
                           <div>
                             <p>Top Comment:</p>
+                            <p>{post.comments[0].postedBy}</p>
                             <p>{post.comments[0].body}</p>
                           </div>
                         )}

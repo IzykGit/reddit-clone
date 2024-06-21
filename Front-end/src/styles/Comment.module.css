@@ -1,7 +1,8 @@
 
 .comment_post {
     border: 1px solid black;
-    width: 70%;
+    width: 100%;
+    background-color: #1a1a1a;
 
     display: flex;
     flex-direction: column;

@@ -2,16 +2,29 @@
     display: flex;
     align-items: center;
     flex-direction: column;
+
+    background-color: #1a1a1a;
+    color: #EEF0F2;
+    height: max-content;
+
+    padding-bottom: 6rem;
+}
+
+
+.content {
+    position: relative;
+    top: 2rem;
+
+    width: 35rem;
+    height: max-content;
 }
 
 .detail_container {
     border: 1px solid black;
-    width: 70%;
     margin-bottom: 2rem;
 }
 
 .comment_container {
-    width: 70%;
     min-height: 10rem;
     height: max-content;
 }
