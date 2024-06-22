@@ -20,7 +20,7 @@ const Navbar = () => {
               <button className={styles.navlink} type='button' aria-label='Sign Out' onClick={() => {
                 signOut(getAuth())
               }}>Sign Out</button>
-              <Link to={"/profile"}>Profile</Link>
+              <Link className={styles.navlink} to={"/profile"}>Profile</Link>
           </nav>
         ) : (
           <nav className={styles.navbar}>

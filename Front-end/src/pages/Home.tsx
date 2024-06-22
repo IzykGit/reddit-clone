@@ -38,7 +38,7 @@ interface Photos {
 interface Comments {
   body: string,
   date: Date
-  postedBy: string
+  userName: string
 }
 
 
@@ -196,7 +196,7 @@ const Home = () => {
                         {post.comments.length > 0 && (
                           <div>
                             <p>Top Comment:</p>
-                            <p>{post.comments[0].postedBy}</p>
+                            <p>{post.comments[0].userName}</p>
                             <p>{post.comments[0].body}</p>
                           </div>
                         )}

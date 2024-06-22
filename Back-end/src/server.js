@@ -679,7 +679,7 @@ app.post('/api/posts/:postId/comment', async (req, res) => {
             $push: { comments: {
                 body,
                 date: new Date(date),
-                postedBy: user.userName,
+                userName: user.userName,
                 id: new ObjectId(),
                 userId: req.user.uid
             }} 

@@ -13,7 +13,7 @@ import {initializeFirestore} from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyClaf6Su7Tl-xQ-B5KXKhp8ltplH9OOPX0",
+  apiKey: "",
   authDomain: "social-app-3310b.firebaseapp.com",
   projectId: "social-app-3310b",
   storageBucket: "social-app-3310b.appspot.com",

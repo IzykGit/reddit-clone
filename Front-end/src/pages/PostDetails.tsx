@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import { useLocation } from 'react-router-dom'
 import axios from 'axios'
+import { Link } from 'react-router-dom'
 
 import styles from '../styles/PostDetails.module.css'
 
@@ -21,7 +22,7 @@ import deleteComment from '../hooks/deleteComment.ts'
 interface Comments {
     body: string,
     date: Date
-    postedBy: string,
+    userName: string,
     id: string,
     userId: string,
     likes: number,
@@ -223,7 +224,10 @@ const Post = () => {
                     
                     // can now display comments, still need to fix comment date
                     <div className={styles.comment} key={index}>
-                        <p>{comment.postedBy}</p>
+                        <Link to={`/profile/${comment.userName}`} state={{ userName: comment.userName }} className={styles.media_link}>
+                            <p>{comment.userName}</p>
+                        </Link>
+
                         <p>{comment.body}</p>
 
                         {user?.uid === comment.userId ? (

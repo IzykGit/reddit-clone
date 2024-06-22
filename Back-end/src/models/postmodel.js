@@ -5,7 +5,15 @@ const { Schema } = mongoose;
 const postSchema = new Schema({
     userId: String,
     body: String,
-    comments: [{ postedBy: String, body: String, date: Date, likes: Number, likedIds: Array, id: String, userId: String }],
+    comments: [{
+        userName: String,
+        body: String,
+        date: Date,
+        likes: Number,
+        likeIds: [{ likeIds: String }],
+        id: String,
+        userId: String 
+    }],
     imageId: String,
     date: { type: Date },
     likes: { type: Number, default: 0 },

@@ -38,3 +38,10 @@
 .post_image {
     width: 100%;
 }
+
+.media_link {
+    text-decoration: none;
+    color: #EEF0F2;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
