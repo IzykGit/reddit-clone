@@ -50,7 +50,7 @@ const CreateAccountPage = () => {
             const userData = {
                 userName: userName,
                 userId: uid,
-                userEmail: email,
+                userEmail: email, 
                 date: new Date().toISOString()
             };
 

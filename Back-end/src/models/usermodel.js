@@ -20,12 +20,7 @@ const userSchema = new Schema({
     },
     date: {
         type: Date
-    },
-    notifications: [{
-        title: String,
-        date: Date,
-        default: []
-    }]
+    }
 })
 
 const UserProfile = mongoose.model('Post', userSchema)

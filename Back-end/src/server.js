@@ -329,10 +329,17 @@ app.post("/api/create-user", async (req, res) => {
         date: req.body.date
     };
 
+    const newNotificationsDoc = {
+        userId: req.body.userId,
+        notifications: []
+    }
+
     try { 
         await client.connect()
         const db = client.db('SocialApp');
         await db.collection('users').insertOne(newUser);
+
+        await db.collection('notifications').insertOne(newNotificationsDoc)
 
         res.status(201).send("User added to MongoDB")
     }
@@ -513,12 +520,12 @@ app.put('/api/:postId/like', async (req, res) => {
                 }
             )
 
-            // await db.collection("notifications").findOneAndUpdate(
-            //     { userId: userId },
-            //     {
-            //         $push: { }
-            //     }
-            // )
+            await db.collection("notifications").findOneAndUpdate(
+                { userId: userId },
+                {
+                    $push: { }
+                }
+            )
 
         }
 

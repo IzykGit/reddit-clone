@@ -9,7 +9,8 @@ const notificationsSchema = new Schema({
     },
     notifications: [{
         title: String,
-        date: Date
+        date: Date,
+        default: []
     }]
 })
 
