@@ -14,8 +14,6 @@ import LikeHandler from '../components/LikeHandler.tsx';
 import useUser from "../hooks/useUser.ts";
 import deleteComment from '../hooks/deleteComment.ts';
 
-import CommentLikeHandler from '../components/CommentLikeHandler.tsx';
-
 
 
 
@@ -232,13 +230,6 @@ const Post = () => {
                         </Link>
 
                         <p>{comment.body}</p>
-
-
-                        {user ? (
-                            <CommentLikeHandler postId={postId} commentLikes={comment.likes} commentId={comment.id}/>
-                        ) : (
-                            <p></p>
-                        )}
 
                         {user?.uid === comment.userId ? (
                             <button type='button'

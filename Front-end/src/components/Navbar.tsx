@@ -21,6 +21,7 @@ const Navbar = () => {
                 signOut(getAuth())
               }}>Sign Out</button>
               <Link className={styles.navlink} to={"/profile"}>Profile</Link>
+              <Link className={styles.navlink} to={"/notifications"}>Notifications</Link>
           </nav>
         ) : (
           <nav className={styles.navbar}>

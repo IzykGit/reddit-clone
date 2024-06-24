@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage.tsx'
 import CreateAccountPage from './pages/CreateAccountPage.tsx'
 import Profile from './pages/Profile.tsx'
 import ProfileVisitor from './pages/ProfileVisitor.tsx'
+import Notifications from './pages/Notifications.tsx'
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
         <Route path='/' element={<Home />}/>
         <Route path='/profile' element={<Profile />}/>
         <Route path='/profile/:userName' element={<ProfileVisitor />}/>
+        <Route path='/notifications' element={<Notifications />} />
         <Route path='/post/:id' element={<PostDetails />}/>
         <Route path='/login' element={<LoginPage />} />
         <Route path='/create-account' element={<CreateAccountPage />}/>

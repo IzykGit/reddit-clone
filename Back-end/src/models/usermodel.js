@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-import { type } from 'os';
 
 const { Schema } = mongoose;
 
@@ -21,7 +20,12 @@ const userSchema = new Schema({
     },
     date: {
         type: Date
-    }
+    },
+    notifications: [{
+        title: String,
+        date: Date,
+        default: []
+    }]
 })
 
 const UserProfile = mongoose.model('Post', userSchema)

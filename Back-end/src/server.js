@@ -219,8 +219,6 @@ app.get("/api/post/:id", async (req, res) => {
 // post creation page
 app.post("/api/post", upload.single('file'), async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI);
-    
-    console.log(req.headers.uid)
 
     try {
         // handling post to s3
@@ -515,6 +513,13 @@ app.put('/api/:postId/like', async (req, res) => {
                 }
             )
 
+            // await db.collection("notifications").findOneAndUpdate(
+            //     { userId: userId },
+            //     {
+            //         $push: { }
+            //     }
+            // )
+
         }
 
         // updated post
@@ -705,42 +710,6 @@ app.post('/api/posts/:postId/comment', async (req, res) => {
 })
 
 
-// liking a comment
-app.put('/api/:post/:comment/like', async (req, res) => {
-    const client = new MongoClient(process.env.MONGODB_URI);
-
-    const commentId = req.params.comment;
-    const postId = req.params.post;
-
-
-    const userId = req.user.uid
-    console.log("User id", userId)
-    try {
-        await client.connect()
-        const db = client.db("SocialApp");
-
-        console.log("Connected to database");
-
-        await db.collection('posts').updateOne(
-            { _id: new ObjectId(postId), 'comments.Id': commentId },
-            {
-              $push: { 'comments.$.commentLikeIds': req.user.uid },
-              $inc: { 'comments.$.likes': 1 }
-            }
-          );
-
-        const updatedPost = await db.collection('posts').findOne({ _id: new ObjectId(postId) });
-
-        console.log(updatedPost)
-
-        res.status(200).json({ likes: updatedPost.likes })
-    }
-    catch(error) {
-        res.status(400).json({ message: "Like action could not be completed:", error })
-    }
-})
-
-
 
 app.delete('/api/:post/:commentId/comment/delete', async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI);
@@ -779,6 +748,29 @@ app.delete('/api/:post/:commentId/comment/delete', async (req, res) => {
 
 
 
+
+
+app.get('/api/user-notifications', async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI);
+
+    const { uid } = req.user
+
+    try {
+        await client.connect()
+        const db = client.db("SocialApp")
+
+        const notifications = await db.collection("notifications").find({ userId: uid })
+        .sort({ date: -1 }).toArray()
+
+        res.status(200).json(notifications)
+    }
+    catch(error) {
+        res.status(404).json({ message: "Could not fetch notifications" })
+    }
+    finally {
+        await client.close()
+    }
+}) 
 
 
 
