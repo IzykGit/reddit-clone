@@ -9,6 +9,7 @@ import useUser from "../hooks/useUser"
 
 import Navbar from "../components/Navbar"
 import LikeHandler from "../components/LikeHandler"
+import DeleteFunc from "../components/deletePost"
 
 // defining data
 interface Data {
@@ -141,7 +142,7 @@ const Profile = () => {
 
                         <LikeHandler postId={post!._id} postLikes={post!.likes} likedIds={post!.likedIds}/>
                     
-
+                        <DeleteFunc postId={post?._id} imageId={post?.imageId} refreshPosts={() => null} />
                         <div>
                             {post.comments.length > 0 && (
                                 <div>

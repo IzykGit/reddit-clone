@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import useUser from '../hooks/useUser'
 
 
-const DeleteFunc = ({ postId, imageId }: { postId: string | undefined, imageId: string | undefined }) => {
+const DeleteFunc = ({ postId, imageId, refreshPosts }: { postId: string | undefined, imageId: string | undefined, refreshPosts: VoidFunction }) => {
 
     const navigate = useNavigate()
 
@@ -18,14 +18,18 @@ const DeleteFunc = ({ postId, imageId }: { postId: string | undefined, imageId: 
 
     useEffect(() => {
         if(completed) {
-            console.log("Navigating to home page")
-            navigate("/")
-            window.location.reload()
+            if(window.location.pathname !== "/") {
+                console.log("Navigating to home page")
+                navigate("/")
+            }
+            else {
+                refreshPosts()
+            }
         }
         else {
             return
         }
-    }, [completed, navigate])
+    }, [completed, navigate, refreshPosts])
 
     const deletePost = async () => {
         setDisabled(true)

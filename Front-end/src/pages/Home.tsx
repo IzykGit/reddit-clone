@@ -60,6 +60,8 @@ const Home = () => {
 
   const [loading, setLoading] = useState(true)
 
+  const [refresh, setRefresh] = useState(false)
+
 
   useEffect(() => {
     AOS.init({
@@ -97,7 +99,7 @@ const Home = () => {
   useEffect(() => {
     setLoading(true); // Set loading to true before fetching data
     fetchPosts(currentPage).then(() => setLoading(false)); // Set loading to false after fetching data
-  }, [currentPage])
+  }, [currentPage, refresh])
 
   
   
@@ -143,6 +145,10 @@ const Home = () => {
   }, [posts])
 
 
+  const refreshPosts = () => {
+    setRefresh(!refresh)
+  }
+
   return (
     <>
     <Navbar />
@@ -151,10 +157,10 @@ const Home = () => {
 
       <section className={styles.content}>
         
-      <CreatePost />
+      <CreatePost refreshPosts={refreshPosts}/>
 
       {loading ? (
-        <p>Loading...</p>
+        <p className={styles.loading}>Loading...</p>
       ) : (
         <div>
           {posts.length === 0 ? (
@@ -189,7 +195,7 @@ const Home = () => {
                     {/* if the post userId matches the current logged in user
                     the user can make a delete request on that page */}
                     {user && post.userId === user.uid && (
-                      <DeleteFunc postId={post._id} imageId={post.imageId} />
+                      <DeleteFunc postId={post._id} imageId={post.imageId} refreshPosts={refreshPosts}/>
                     )}
 
                     <div>

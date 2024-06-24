@@ -4,7 +4,7 @@ import styles from '../styles/CreatePost.module.css'
 
 import useUser from "../hooks/useUser"
 
-const CreatePost = () => {
+const CreatePost = ({refreshPosts}: {refreshPosts: VoidFunction}) => {
 
     const { user } = useUser()
 
@@ -44,7 +44,6 @@ const CreatePost = () => {
             }
             formData.append("date", new Date().toISOString());
             formData.append("likes", `${0}`)
-            formData.append("likedIds", JSON.stringify([]))
             formData.append("userId", user.uid)
 
             const token = await user?.getIdToken();
@@ -59,9 +58,10 @@ const CreatePost = () => {
             });
             setBody("")
             setFile(null)
-            setDisabled(true)
+            setDisabled(false)
+
+            refreshPosts()
             console.log("Post created:", response.data);
-            window.location.reload()
         } catch (error) {
             console.error("Error creating post:", error);
         }
@@ -70,9 +70,9 @@ const CreatePost = () => {
 
     useEffect(() => {
         // generating a unique image identifier when image is uploaded
-        const videoTypes = ['video/mp4', 'video/avi', 'video/mov', 'video/wmv']
+        const validImageTypes = ['image/gif', 'image/jpeg', 'image/png'];
         if(file) {
-            if(videoTypes.includes(file.type)) {
+            if(!validImageTypes.includes(file.type)) {
                 setDisabled(true)
                 return setFileErr("Must be an image")
             }

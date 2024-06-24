@@ -195,8 +195,7 @@ app.get("/api/post/:id", async (req, res) => {
         await client.connect();
 
         const db = client.db("SocialApp");
-        const post = await db.collection('posts').findOne({ _id: postId })
-        console.log(post)
+        const post = await db.collection('posts').findOne({ _id: postId });
 
         if(post) {
             const likedIds = post.upvoteIds || [];
@@ -519,7 +518,10 @@ app.put('/api/:postId/like', async (req, res) => {
         }
 
         // updated post
-        const updatedPost = await db.collection('posts').findOne({ _id: new ObjectId(postId) })
+        const updatedPost = await db.collection('posts').findOne(
+            { _id: new ObjectId(postId) },
+            { projection: { likes: 1, _id: 0 } }
+        )
 
 
         // checking if updated post exists
@@ -530,7 +532,7 @@ app.put('/api/:postId/like', async (req, res) => {
             console.log("like made")
 
             // returning status and updated post
-            return res.status(200).json(updatedPost)
+            return res.status(200).json({ likes: updatedPost.likes })
 
         }
         else {
@@ -589,7 +591,10 @@ app.put('/api/:postId/unlike', async (req, res) => {
                 }
             )
         }
-        const updatedPost = await db.collection('posts').findOne({ _id: new ObjectId(postId) })
+        const updatedPost = await db.collection('posts').findOne(
+            { _id: new ObjectId(postId) },
+            { projection: {likes: 1} }
+        )
 
         if(updatedPost) {
             console.log("unlike made")
@@ -681,7 +686,9 @@ app.post('/api/posts/:postId/comment', async (req, res) => {
                 date: new Date(date),
                 userName: user.userName,
                 id: new ObjectId(),
-                userId: req.user.uid
+                userId: req.user.uid,
+                likes: 0,
+                commentLikeIds: []
             }} 
         })
 
@@ -697,35 +704,73 @@ app.post('/api/posts/:postId/comment', async (req, res) => {
     }
 })
 
+
+// liking a comment
+app.put('/api/:post/:comment/like', async (req, res) => {
+    const client = new MongoClient(process.env.MONGODB_URI);
+
+    const commentId = req.params.comment;
+    const postId = req.params.post;
+
+
+    const userId = req.user.uid
+    console.log("User id", userId)
+    try {
+        await client.connect()
+        const db = client.db("SocialApp");
+
+        console.log("Connected to database");
+
+        await db.collection('posts').updateOne(
+            { _id: new ObjectId(postId), 'comments.Id': commentId },
+            {
+              $push: { 'comments.$.commentLikeIds': req.user.uid },
+              $inc: { 'comments.$.likes': 1 }
+            }
+          );
+
+        const updatedPost = await db.collection('posts').findOne({ _id: new ObjectId(postId) });
+
+        console.log(updatedPost)
+
+        res.status(200).json({ likes: updatedPost.likes })
+    }
+    catch(error) {
+        res.status(400).json({ message: "Like action could not be completed:", error })
+    }
+})
+
+
+
 app.delete('/api/:post/:commentId/comment/delete', async (req, res) => {
-    const client = new MongoClient(process.env.MONGODB_URI)
+    const client = new MongoClient(process.env.MONGODB_URI);
 
     const commentId = req.params.commentId;
-    const postId = req.params.post
+    const postId = req.params.post;
 
-    console.log("Post Identifier:", postId)
-    console.log("Comment Identifier:", commentId)
+    console.log("Post Identifier:", postId);
+    console.log("Comment Identifier:", commentId);
 
-    console.log("Attempting to del comment")
+    console.log("Attempting to del comment");
 
     try {
         await client.connect();
         const db = client.db("SocialApp");
 
-        console.log("Connected to database")
+        console.log("Connected to database");
 
         const result = await db.collection('posts').updateOne(
             { _id: new ObjectId(postId) },
             { $pull: { "comments": { id: new ObjectId(commentId) } }}
-        )
+        );
 
-        return res.status(200).json({ message: "comment deleted", result })
+        return res.status(200).json({ message: "comment deleted", result });
     }
     catch(error) {
-        return res.status(400).json(error)
+        return res.status(400).json(error);
     }
     finally {
-        await client.close()
+        await client.close();
     }
 })
 

@@ -6,14 +6,15 @@ import { Link } from 'react-router-dom'
 
 import styles from '../styles/PostDetails.module.css'
 
-import Comment from '../components/Comment'
+import Comment from '../components/Comment';
 
 import DeleteFunc from "../components/deletePost.tsx";
-import LikeHandler from '../components/LikeHandler.tsx'
+import LikeHandler from '../components/LikeHandler.tsx';
 
-import useUser from "../hooks/useUser.ts"
-import deleteComment from '../hooks/deleteComment.ts'
+import useUser from "../hooks/useUser.ts";
+import deleteComment from '../hooks/deleteComment.ts';
 
+import CommentLikeHandler from '../components/CommentLikeHandler.tsx';
 
 
 
@@ -26,7 +27,7 @@ interface Comments {
     id: string,
     userId: string,
     likes: number,
-    likedIds: string[]
+    commentLikeIds: string[]
 }
 
 interface Data {
@@ -192,7 +193,7 @@ const Post = () => {
         <div className={styles.content}>
 
         {post ? (
-            <div className={styles.detail_container}>
+            <section className={styles.detail_container} aria-label='Post Details'>
 
                 <h1>{post?.title}</h1>
                 <p>{post?.body}</p>
@@ -205,18 +206,20 @@ const Post = () => {
 
                 {/* deleting post handler, see src/api/deletePost.tsx */}
                 {user && post.userId === user.uid && (
-                <DeleteFunc postId={post?._id} imageId={post?.imageId} />
+                <DeleteFunc postId={post?._id} imageId={post?.imageId} refreshPosts={() => null}/>
                 )}
-            </div>   
+            </section>   
         ) : (
-            <p>No post</p>
+            <section aria-label='Post Details'>
+                <p>No post</p>
+            </section>
         )}
 
 
             
             <Comment refreshComments={refreshComments} postId={post?._id}/>
 
-            <div className={styles.comment_container}>
+            <section className={styles.comment_container} aria-label='Comment Section'>
                 <p>Comments</p>
                 {comments.length === 0 ? (
                     <p>No comments</p>
@@ -230,6 +233,13 @@ const Post = () => {
 
                         <p>{comment.body}</p>
 
+
+                        {user ? (
+                            <CommentLikeHandler postId={postId} commentLikes={comment.likes} commentId={comment.id}/>
+                        ) : (
+                            <p></p>
+                        )}
+
                         {user?.uid === comment.userId ? (
                             <button type='button'
                             onClick={() => {
@@ -242,14 +252,17 @@ const Post = () => {
                                 console.log(comment.id)
                             }}   
                             disabled={disabled}
+                            aria-label='Delete Your Comment'
                             >Delete Comment</button>
                         ) : (
                             <p></p>
                         )}
 
+                        
+
                     </div>
                 ))}
-            </div>
+            </section>
         </div>
 
 

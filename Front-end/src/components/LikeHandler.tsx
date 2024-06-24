@@ -40,7 +40,6 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
 
         setDisableButton(true)
         const token = await user.getIdToken();
-        console.log("Token:", token)
         const headers = { Authorization: `Bearer ${token}` };
         
         if (postId) {
