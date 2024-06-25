@@ -221,6 +221,10 @@ app.post("/api/post", upload.single('file'), async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI);
 
     try {
+
+    await client.connect();
+    const db = client.db('SocialApp');
+    
         // handling post to s3
         if (req.file) {
         
@@ -245,9 +249,6 @@ app.post("/api/post", upload.single('file'), async (req, res) => {
             console.log('No file found in the request');
         }
 
-        await client.connect();
-        const db = client.db('SocialApp');
-
         const userInfo = await db.collection('users').findOne({ userId: req.user.uid })
         console.log("Username from userinfo:", userInfo.userName)
 
@@ -256,12 +257,29 @@ app.post("/api/post", upload.single('file'), async (req, res) => {
             imageId: req.body.imageId, // save the generated image ID in the post data
             userName: userInfo.userName
         };
+
         
 
         // handling post to mongodb
 
         const newPost = new Post(newPostData);
-        await db.collection('posts').insertOne(newPost);
+        const insertedPost = await db.collection('posts').insertOne(newPost);
+
+        console.log("Inserted Post Id:", insertedPost.insertedId)
+
+        await db.collection("notifications").updateOne(
+            { userId: req.user.uid },
+            {
+                // adding user and post data to notifications array
+                $push: { notifications:
+                    {
+                        userNames: [],
+                        postId: insertedPost.insertedId,
+                        postBody: req.body.body
+                    }
+                }
+            }
+        )
   
         res.status(201).json(newPost);
     }
@@ -510,8 +528,8 @@ app.put('/api/:postId/like', async (req, res) => {
 
             console.log("In like request")
 
-            await db.collection("posts").updateOne(
-                {_id: new ObjectId(postId) },
+            const originalPost = await db.collection("posts").findOneAndUpdate(
+                { _id: new ObjectId(postId) },
                 { 
                     // incrementing likes by one
                     $inc: {likes: 1 },
@@ -520,38 +538,51 @@ app.put('/api/:postId/like', async (req, res) => {
                 }
             )
 
-            await db.collection("notifications").findOneAndUpdate(
-                { userId: userId },
-                {
-                    $push: { }
+
+            // updated post
+            const updatedPost = await db.collection('posts').findOne(
+                { _id: new ObjectId(postId) },
+                { projection: { likes: 1, _id: 0 } }
+            )
+            
+
+            console.log("adding like to notifications array")
+
+            const fetchLikersName = await db.collection("users").findOne({ userId: userId })
+
+            console.log("Original Posters userId:", originalPost.userId)
+            console.log("Likers username:", fetchLikersName.userName)
+
+
+            if(originalPost.userId === req.user.uid) {
+
+                // if user likes their own post then notification will not be sent to user
+                return res.status(200).json({ likes: updatedPost.likes })
+            }
+
+
+            // updating notifications array with liked user
+            await db.collection("notifications").updateOne(
+                { userId: originalPost.userId, "notifications.postId": new ObjectId(postId) },
+                {   
+                    // adding username to notifications array
+                    $push: { "notifications.$.userNames": fetchLikersName.userName }
                 }
             )
 
-        }
 
-        // updated post
-        const updatedPost = await db.collection('posts').findOne(
-            { _id: new ObjectId(postId) },
-            { projection: { likes: 1, _id: 0 } }
-        )
+            // checking if updated post exists
+            if(updatedPost) {
 
+                // returning status and updated post
+                return res.status(200).json({ likes: updatedPost.likes })
 
-        // checking if updated post exists
-        if(updatedPost) {
-
-            // displaying updated likeIds
-            console.log(updatedPost.likedIds)
-            console.log("like made")
-
-            // returning status and updated post
-            return res.status(200).json({ likes: updatedPost.likes })
+            }
+            else {
+                return res.status(400).json({ message: "Like Failed" })
+            }
 
         }
-        else {
-            return res.status(400).json({ message: "Like Failed" })
-        }
-
-
     }
     catch (error) {
         console.log("like failed")
@@ -569,39 +600,50 @@ app.put('/api/:postId/like', async (req, res) => {
 app.put('/api/:postId/unlike', async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI)
     const postId = req.params.postId;
-    const uid = req.user.uid
+    const userId = req.user.uid
 
-    console.log(uid)
+    console.log(userId)
 
     console.log("attempting to unlike")
     try {
         await client.connect()
         const db = client.db('SocialApp');
     
-        const post = await db.collection('posts').findOne({ _id: new ObjectId(postId) })
+        const originalPost = await db.collection('posts').findOne({ _id: new ObjectId(postId) })
         
-        if(!post) {
+        if(!originalPost) {
             return res.status(400).json({ message: "No Post" })
         }
 
-        const likedIds = post.likedIds || [];
+        const likedIds = originalPost.likedIds || [];
         console.log(`Liked IDs: ${likedIds}`)
 
-        const canUnLike = uid && likedIds.includes(uid)
+        const canUnLike = userId && likedIds.includes(userId)
         console.log(`Can Unlike: ${canUnLike}`);
-            // removing like and userId from likedIds array
-            if(canUnLike) {
+        
+        // removing like and userId from likedIds array
+        if(canUnLike) {
 
                 console.log("can unlike")
                 await db.collection("posts").updateOne(
-                {_id: new ObjectId(postId) },
-                {   
-                    // removing one like
-                    $inc: { likes: -1 },
-                    // removing the userId from the likedIds array
-                    $pull: { likedIds: uid }
-                }
-            )
+                    { _id: new ObjectId(postId) },
+                    {   
+                        // removing one like
+                        $inc: { likes: -1 },
+                        // removing the userId from the likedIds array
+                        $pull: { likedIds: userId }
+                    }
+                )
+
+                const fetchUserName = await db.collection("users").findOne({ userId: userId })
+
+                await db.collection("notifications").updateOne(
+                    { userId: originalPost.userId, "notifications.postId": new ObjectId(postId) },
+                    {   
+                        // pulling username from notifications array
+                        $pull: { "notifications.$.userNames": fetchUserName.userName }
+                    }
+                )
         }
         const updatedPost = await db.collection('posts').findOne(
             { _id: new ObjectId(postId) },
