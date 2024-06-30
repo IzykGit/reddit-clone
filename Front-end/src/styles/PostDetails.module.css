@@ -6,6 +6,7 @@
     background-color: #1a1a1a;
     color: #EEF0F2;
     height: max-content;
+    min-height: 100vh;
 
     padding-bottom: 6rem;
 }

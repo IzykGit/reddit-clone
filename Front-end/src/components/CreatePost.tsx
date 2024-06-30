@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import TextareaAutosize from 'react-textarea-autosize';
 import axios from "axios";
 import styles from '../styles/CreatePost.module.css'
 
@@ -34,6 +35,10 @@ const CreatePost = ({refreshPosts}: {refreshPosts: VoidFunction}) => {
 
         try {
             const formData = new FormData();
+
+            if(body.length > 300) {
+                return
+            }
             formData.append("body", body);
             if(file && imageId) {
 
@@ -100,15 +105,28 @@ const CreatePost = ({refreshPosts}: {refreshPosts: VoidFunction}) => {
         <>
         {user ? (
             <form onSubmit={handleSubmit} className={styles.create_post}>
+
                 <div className={styles.inputs}>
                     <label htmlFor="textcontent">Body</label>
-                    <textarea id="textcontent" value={body} onChange={(e) => setBody(e.target.value)} required/>
+                    <TextareaAutosize id="textcontent" value={body} onChange={(e) => {
+                        setBody(e.target.value)
+                    }} required className={styles.textarea}/>
                 </div>
+
                 <div className={styles.inputs}>
-                    <label htmlFor="file">Image</label>
-                    <p>{fileErr.length == 0 ? "" : "Must be an image"}</p>
-                    <input id="file" type="file" onChange={handleFileChange}/>
+
+                    <div className={styles.image_input}>
+                        <label htmlFor="file">Image</label>
+                        <p>{fileErr.length == 0 ? "" : "Must be an image"}</p>
+                        <input id="file" type="file" onChange={handleFileChange} placeholder="" aria-label="Upload Image"/>
+                    </div>
+
+                    <p className={body.length <= 300 ? styles.character_counter : styles.character_counter_error}>
+                        {body.length === 0 ? "" : body.length}
+                    </p>
                 </div>
+
+
                 <button type="submit"
                 disabled={disabled}>Create Post</button>
             </form>

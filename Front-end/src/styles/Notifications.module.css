@@ -1,0 +1,49 @@
+
+.noti_main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+
+    background-color: #1a1a1a;
+
+    min-height: 100vh;
+}
+
+.notification_container {
+    width: 40rem;
+    height: 8rem;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    margin: 1rem 0rem;
+    padding: 1rem;
+
+    text-decoration: none;
+    border: 0.15rem solid #292929;
+    border-radius: 1rem;
+}
+
+.notification_container > p {
+    margin: 0.5rem;
+}
+
+.notification_container > p:nth-child(1) {
+    color: #EEF0F2;
+}
+
+.notification_container > p:nth-child(2) {
+    color: #8b8b8b;
+}
+
+.error {
+    color: #EEF0F2;
+}
+
+.loading {
+    color: #EEF0F2;
+    font-size: 1.5rem;
+    font-weight: 700;
+}

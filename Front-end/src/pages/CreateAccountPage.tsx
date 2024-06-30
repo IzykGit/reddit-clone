@@ -30,6 +30,10 @@ const CreateAccountPage = () => {
                 return;
             }
 
+            if (userName.length > 20) {
+                setError("Your username is greater than 20 characters!")
+            }
+
             // check if the username exists
             const userDetailsCheckResponse = await axios({
                 method: "GET",

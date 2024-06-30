@@ -3,7 +3,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, $Command } from '@aws-sdk/client-s3';
 import multer from 'multer';
 import stream from 'stream';
 
@@ -86,7 +86,6 @@ app.use(async (req, res, next) => {
 
         try {
             req.user = await admin.auth().verifyIdToken(token)
-
         }
         catch (e) {
             console.log("Invalid authtoken", e)
@@ -528,13 +527,22 @@ app.put('/api/:postId/like', async (req, res) => {
 
             console.log("In like request")
 
-            const originalPost = await db.collection("posts").findOneAndUpdate(
+            const likersName = await db.collection("users").findOne(
+                { userId: userId },
+                { projection: { userName: 1 } }
+            )
+            console.log("Likers username:", likersName)
+
+            await db.collection("posts").findOneAndUpdate(
                 { _id: new ObjectId(postId) },
                 { 
                     // incrementing likes by one
-                    $inc: {likes: 1 },
+                    $inc: { likes: 1 },
                     // adding user id to the likeIds array of the post
-                    $push: { likedIds: userId }
+                    // adding username to the likeNames array of the post
+                    $push: { likedIds: userId, likeNames: likersName.userName },
+                    // setting new like date
+                    $currentDate: { updatedAt: true },
                 }
             )
 
@@ -543,31 +551,6 @@ app.put('/api/:postId/like', async (req, res) => {
             const updatedPost = await db.collection('posts').findOne(
                 { _id: new ObjectId(postId) },
                 { projection: { likes: 1, _id: 0 } }
-            )
-            
-
-            console.log("adding like to notifications array")
-
-            const fetchLikersName = await db.collection("users").findOne({ userId: userId })
-
-            console.log("Original Posters userId:", originalPost.userId)
-            console.log("Likers username:", fetchLikersName.userName)
-
-
-            if(originalPost.userId === req.user.uid) {
-
-                // if user likes their own post then notification will not be sent to user
-                return res.status(200).json({ likes: updatedPost.likes })
-            }
-
-
-            // updating notifications array with liked user
-            await db.collection("notifications").updateOne(
-                { userId: originalPost.userId, "notifications.postId": new ObjectId(postId) },
-                {   
-                    // adding username to notifications array
-                    $push: { "notifications.$.userNames": fetchLikersName.userName }
-                }
             )
 
 
@@ -624,6 +607,12 @@ app.put('/api/:postId/unlike', async (req, res) => {
         // removing like and userId from likedIds array
         if(canUnLike) {
 
+            const likersName = await db.collection("users").findOne(
+                { userId: userId },
+                { projection: { userName: 1 } }
+            )
+            console.log("Likers username:", likersName)
+
                 console.log("can unlike")
                 await db.collection("posts").updateOne(
                     { _id: new ObjectId(postId) },
@@ -631,19 +620,11 @@ app.put('/api/:postId/unlike', async (req, res) => {
                         // removing one like
                         $inc: { likes: -1 },
                         // removing the userId from the likedIds array
-                        $pull: { likedIds: userId }
+                        // removing the username from the likeNames array
+                        $pull: { likedIds: userId, likeNames: likersName.userName },
                     }
                 )
 
-                const fetchUserName = await db.collection("users").findOne({ userId: userId })
-
-                await db.collection("notifications").updateOne(
-                    { userId: originalPost.userId, "notifications.postId": new ObjectId(postId) },
-                    {   
-                        // pulling username from notifications array
-                        $pull: { "notifications.$.userNames": fetchUserName.userName }
-                    }
-                )
         }
         const updatedPost = await db.collection('posts').findOne(
             { _id: new ObjectId(postId) },
@@ -799,27 +780,84 @@ app.delete('/api/:post/:commentId/comment/delete', async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
 app.get('/api/user-notifications', async (req, res) => {
     const client = new MongoClient(process.env.MONGODB_URI);
 
-    const { uid } = req.user
+    const userId = req.user.uid
+    console.log(userId)
+
+    const todaysDate = new Date()
+    const lastFifteenDays = new Date(todaysDate);
+
+    lastFifteenDays.setDate(todaysDate.getDate() - 15);
+
+    const pipeline = [
+        { $match: { userId: userId } },
+        { $project: {
+            body: 1,
+            likeNames: 1,
+            likeNamesCount: { $size: "$likeNames" }
+        } },
+        { $unwind: "$likeNames" },
+        { $sort: { "likeNames.date": -1 } }, // Sort by the date field in descending order
+        { $group: {
+            _id: "$_id",
+            body: { $first: "$body" },
+            likeNames: { $push: "$likeNames" },
+            likeNamesCount: { $first: "$likeNamesCount" }
+        }},
+        { $project: {
+            _id: 1,
+            body: 1,
+            likeNames: { $slice: ["$likeNames", 2] }, // Get the 2 most recent names
+            likeNamesCount: 1
+        }}
+    ];
 
     try {
         await client.connect()
         const db = client.db("SocialApp")
 
-        const notifications = await db.collection("notifications").find({ userId: uid })
-        .sort({ date: -1 }).toArray()
+        const recentLikes = await db.collection("posts").aggregate(pipeline).toArray();
 
-        res.status(200).json(notifications)
+        console.log(recentLikes)
+        res.status(200).json(recentLikes)
     }
     catch(error) {
-        res.status(404).json({ message: "Could not fetch notifications" })
+        res.status(404).json(notifications)
     }
     finally {
         await client.close()
     }
 }) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -854,6 +892,7 @@ app.delete('/api/post/:id/:imageId', async (req, res) => {
     }
 
 })
+
 
 
 
