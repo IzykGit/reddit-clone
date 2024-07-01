@@ -1,0 +1,41 @@
+
+.like_counter_button {
+    display: flex;
+    align-items: center;
+
+    margin: 0.5rem 0rem;
+    padding: 0;
+
+    height: 3rem;
+}
+
+.likes {
+    font-size: 1.5rem;
+    height: 3rem;
+
+    margin-right: 0.3rem;
+
+    display: flex;
+    align-items: center;
+}
+
+.like_button {
+    background-color: transparent;
+    border: none;
+
+    padding: none;
+    height: 3rem;
+
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+}
+
+.like_button > img {
+    width: 2rem;
+
+    margin: 0;
+    padding: 0;
+}
+

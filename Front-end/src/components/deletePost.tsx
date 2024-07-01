@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 import useUser from '../hooks/useUser'
 
+import styles from '../styles/DeletePost.module.css'
 
 const DeleteFunc = ({ postId, imageId, refreshPosts }: { postId: string | undefined, imageId: string | undefined, refreshPosts: VoidFunction }) => {
 
@@ -62,7 +63,7 @@ const DeleteFunc = ({ postId, imageId, refreshPosts }: { postId: string | undefi
             <div>
                 <button disabled={disabled} type='button' onClick={() => {
                     deletePost();
-                }}>Delete</button>
+                }} className={styles.delete_post}>Delete</button>
             </div>
         ) : (
             <div></div>

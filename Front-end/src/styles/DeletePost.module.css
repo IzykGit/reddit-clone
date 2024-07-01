@@ -1,0 +1,22 @@
+
+
+.delete_post {
+    background-color: transparent;
+
+    border: 0.15rem solid #292929;
+    border-radius: 0.5rem;
+
+    width: max-content;
+    height: 2rem;
+
+    padding: 0rem 2rem;
+
+    color: #EEF0F2;
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.delete_post:hover {
+    transform: scale(0.9);
+}

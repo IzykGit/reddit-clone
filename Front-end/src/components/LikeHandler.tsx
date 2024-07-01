@@ -4,7 +4,10 @@ import { Link } from "react-router-dom"
 
 import useUser from "../hooks/useUser"
 
+import styles from "../styles/LikeHandler.module.css"
 
+import Unlike from '../assets/unlike.png'
+import Like from '../assets/like.png'
 
 const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLikes: number, likedIds: string[] }) => {
 
@@ -91,15 +94,19 @@ const LikeHandler = ({ postId, postLikes, likedIds }: { postId: string, postLike
 
     return (
         <>
-        <div>
-            {/* checking to see if likes is greater than one */}
-            <p>{likes === 0 ? "No Likes" : likes}</p>
-        </div>
         {user ? (
-            <div>
+            <div className={styles.like_counter_button}>
+                <div>
+                    {/* checking to see if likes is greater than one */}
+                    <p className={styles.likes}>{likes === 0 ? 0 : likes}</p>
+                </div>
                 {/* determining if user can like post or unlike post */}
-                <button disabled={disableButton} type="button" onClick={() => setClicked(true)}>
-                    {alreadyLiked ? "Unlike" : "Like"}
+                <button className={styles.like_button} disabled={disableButton} type="button" onClick={() => setClicked(true)}>
+                    {alreadyLiked ? (
+                        <img src={Like}/>
+                    ) : (
+                        <img src={Unlike} />
+                    )}
                 </button>
             </div>
         ) : (

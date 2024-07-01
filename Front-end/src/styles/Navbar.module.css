@@ -9,7 +9,7 @@
 
     position: relative;
     z-index: 2;
-    background-color: #1a1a1a;
+    background-color: #111111;
     border-bottom: 0.15rem solid #292929;
 }
 .nav_section > div {

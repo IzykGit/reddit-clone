@@ -187,16 +187,18 @@ const Home = () => {
                       )}
                     </Link>
 
-                    
-                    {/* like and unlike handler, see src/components/LikeHandler.tsx */}
-                    <LikeHandler postId={post!._id} postLikes={post!.likes} likedIds={post!.likedIds}/>
-                      
+                    <div className={styles.like_delete_container}>
+                      {/* like and unlike handler, see src/components/LikeHandler.tsx */}
+                      <LikeHandler postId={post!._id} postLikes={post!.likes} likedIds={post!.likedIds}/>
+                        
 
-                    {/* if the post userId matches the current logged in user
-                    the user can make a delete request on that page */}
-                    {user && post.userId === user.uid && (
-                      <DeleteFunc postId={post._id} imageId={post.imageId} refreshPosts={refreshPosts}/>
-                    )}
+                      {/* if the post userId matches the current logged in user
+                      the user can make a delete request on that page */}
+                      {user && post.userId === user.uid && (
+                        <DeleteFunc postId={post._id} imageId={post.imageId} refreshPosts={refreshPosts}/>
+                      )}
+                    </div>
+
 
                     <div>
                         {post.comments.length > 0 && (
